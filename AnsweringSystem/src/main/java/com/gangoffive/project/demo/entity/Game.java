@@ -1,14 +1,16 @@
 package com.gangoffive.project.demo.entity;
 
 import lombok.Data;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Data
 public class Game {
     private List<Role> roles;
-    private List<Player> players;
+    private List<Player> players=new ArrayList<>();
+    private int playerNum;
 
     public Game () {
         this.roles=new ArrayList<>();
@@ -39,9 +41,28 @@ public class Game {
                 "实现梦想","在你的最后一个回合结束时你至少拥有一件名品",5.0,skills));
     }
 
-    public void GameInit (int num,List<String> names,List<Integer> ids) {
+    public void gameInit (int num,List<String> names,List<Integer> ids) {
+        playerNum=num;
         for (int i=0;i<num;i++) {
             players.add(new Player(names.get(i),ids.get(i)));
         }
+    }
+
+    public Map<String,String> gameChooseRole () {
+        Map<String,String> maps=new HashMap<>();
+        Collections.shuffle(roles);
+        for(int i=0;i<playerNum;i++) {
+//            String str=new String();
+            List<Role> tempRole = new ArrayList<>();
+//            tempRole.add(roles.get(i*3));
+//            tempRole.add(roles.get(i*3+1));
+//            tempRole.add(roles.get(i*3+2));
+//            str+=JSONObject.fromObject(roles.get(i*2));
+            tempRole.add(roles.get(i*2));
+            tempRole.add(roles.get(i*2+1));
+//            maps.put(String.valueOf(players.get(i).getId()), JSONArray.fromObject(tempRole).toString());
+            maps.put(String.valueOf(players.get(i).getId()), JSONArray.fromObject(tempRole).toString());
+        }
+        return maps;
     }
 }

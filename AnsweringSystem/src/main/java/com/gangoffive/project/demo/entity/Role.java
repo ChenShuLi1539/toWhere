@@ -32,13 +32,13 @@ public class Role {
     }
 
     public String toString() {
-        String string=name+"为";
+        String string="{name:"+name+",";
         String _sex;
         if(sex==0)
             _sex="女性";
         else
             _sex="男性";
-        string+=_sex+"，";
+        string+="sex:"+_sex+",natures";
         for(Nature e:natures) {
             string+=e.getName()+"为"+e.getLevel()+"，";
         }

@@ -40,7 +40,7 @@ public class GameSocket {
     public void onMessage(String message) throws IOException {
         System.out.println(message);
         switch (message) {
-            case "gameStart": game.GameInit(0,null,null);break;
+            case "gameStart": game.gameInit(0,null,null);break;
         }
     }
 

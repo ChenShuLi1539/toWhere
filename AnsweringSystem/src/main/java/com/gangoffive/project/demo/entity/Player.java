@@ -2,6 +2,7 @@ package com.gangoffive.project.demo.entity;
 
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -10,7 +11,7 @@ public class Player {
     private int id;
     private Role role;
     private Double mood=8.0;
-    private List<BigProject> bigProjects;
+    private List<BigProject> bigProjects=new ArrayList<>();
 
     public Player (String name,int id) {
         this.name=name;
