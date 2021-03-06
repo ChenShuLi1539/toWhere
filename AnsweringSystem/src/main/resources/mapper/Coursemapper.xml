@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gangoffive.project.demo.mapper.CourseMapper">
+    <resultMap id="CourseMap" type="com.gangoffive.project.demo.entity.Course">
+        <id column="courseId"  property="id" />
+        <result  column="courseName" property="name"/>
+        <result  column="departmentName" property="departmentName"/>
+        <result  column="departmentId" property="departmentId"/>
+        <result  column="teacherId" property="teacherId"/>
+        <association property="teacher" javaType="com.gangoffive.project.demo.entity.Teacher">
+            <id column="teacherId"  property="id"/>
+            <result  column="teacherName" property="name"/>
+            <result  column="Email" property="email"/>
+            <result  column="Img" property="img"/>
+            <result  column="role" property="role"/>
+        </association>
+    </resultMap>
+
+
+
+    <select id="QueryCoursesByStuId" resultMap="CourseMap">
+        SELECT Course.Id courseId,Course.Name courseName
+        ,Course.departmentId departmentId,
+        Teacher.Id teacherId,Teacher.Name teacherName,
+        Email,role,Img,Department.`Name` departmentName
+        from Course,CS,Teacher,Department
+        where  Course.Id=CS.courseId and teacherId=Teacher.Id and Department.Id=Course.departmentId
+        and studentId=#{Id}
+    </select>
+    <select id="QueryCoursesByDepartManegerId" resultMap="CourseMap">
+         SELECT b.departmentId ,b.courseName,b.teacherId,b.courseId,Teacher.`Name` teacherName,Department.Name departmentName,
+                Teacher.Email email,Teacher.Img Img,role
+                 FROM
+                (
+                SELECT Course.departmentId departmentId,Course.`Name` courseName,
+                teacherId,Course.Id courseId
+                FROM
+                Course,Administer
+                WHERE Course.departmentId=Administer.departmentId
+                 and Administer.Id=#{Id}
+                ) b,
+                Teacher,Department where Teacher.Id=b.teacherId and Department.Id=b.departmentId
+    </select>
+    <select id="QueryCoursesByTeachId" resultType="com.gangoffive.project.demo.entity.Course">
+        select Course.*,Department.`Name` departmentName
+        from Course,Department
+        where  Department.Id=Course.departmentId  and
+        Course.teacherId=#{Id}
+
+    </select>
+
+
+</mapper>

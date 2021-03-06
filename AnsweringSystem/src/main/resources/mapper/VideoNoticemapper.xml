@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gangoffive.project.demo.mapper.VideoNoticeMapper">
+    <resultMap id="VideoNoticeMap" type="com.gangoffive.project.demo.entity.Notice">
+        <id column="noticeId"  property="id" />
+        <result  column="status" property="status"/>
+        <result  column="courseId" property="courseId"/>
+        <result  column="startTime" property="latestStartTime"/>
+        <result  column="endTime" property="latestEndTime"/>
+        <collection property="historyVideo" ofType="com.gangoffive.project.demo.entity.Video">
+            <id column="videoId"  property="id"/>
+            <result  column="Name" property="name"/>
+            <result  column="studentName" property="studentName"/>
+            <result  column="studentId" property="studentId"/>
+            <result  column="time" property="time"/>
+            <result  column="url" property="url"/>
+            <result  column="noticeId" property="noticeId"/>
+        </collection>
+    </resultMap>
+
+    <select id="showAliveVideoByCourseId" resultMap="VideoNoticeMap">
+            select Notice.*,Video.Id as videoId,Video.*,Student.`Name` studentName
+                from Notice,Video,Student
+                where Notice.Id=Video.noticeId
+                and Student.Id=Video.studentId
+                and courseId=#{CouresId}
+    </select>
+
+    <insert id="addVideoTime">
+         insert into Video(Name,studentId,time,url,noticeId)
+        values (#{Name},#{studentId},#{time},#{url},#{NoticeId})
+
+    </insert>
+
+
+</mapper>

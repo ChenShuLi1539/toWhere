@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gangoffive.project.demo.mapper.OperateVideomapper">
+
+    <update id="changeNameByVideoId">
+         UPDATE Video SET Name = #{VideoName} WHERE Id = #{VideoId}
+    </update>
+    <update id="changeVideoStatue">
+        UPDATE Notice SET status = #{status} WHERE Id = #{noticeId}
+    </update>
+    <delete id="deleteByVideoId">
+        delete from Video where Id=#{VideoId}
+    </delete>
+    <select id="getVideoStatue" resultType="java.lang.Integer">
+        select status from Notice where Id=#{noticeId}
+    </select>
+</mapper>

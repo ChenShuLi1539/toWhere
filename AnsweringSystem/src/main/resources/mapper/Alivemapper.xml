@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gangoffive.project.demo.mapper.LiveMapper">
+    <insert id="addLiveTime">
+        insert into Notice(courseId,startTime,endTime)
+        values (#{courseId},#{startTime},#{endTime})
+    </insert>
+
+    <select id="getTeacherTimesByteacherId" resultType="com.gangoffive.project.demo.entity.AliveTime">
+        SELECT * from teachetTime where  teacherId=#{Id}
+    </select>
+    <select id="getTeacherTodayTimesByteacherId" resultType="com.gangoffive.project.demo.entity.AliveTime">
+         select * from teachetTime where teachetTime.endTime>#{now} and teacherId=#{Id}
+    </select>
+    <select id="getTodayTimesByCourseId" resultType="com.gangoffive.project.demo.entity.AliveTime">
+        select * from Notice where Notice.endTime>#{now} and courseId=#{CourseId}
+    </select>
+
+</mapper>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gangoffive.project.demo.mapper.loginMapper">
+    <insert id="studentRegist">
+       insert into Student (Id,Name,Email,Pwd,role)
+        values (#{Id},#{Name},#{email},#{password},#{role});
+    </insert>
+    <insert id="teacherRegist">
+        insert into Teacher (Id,Name,Email,Pwd,role)
+        values (#{Id},#{Name},#{email},#{password},#{role});
+    </insert>
+
+
+    <select id="LoginById" resultType="java.lang.String">
+        SELECT role from userView where Id=#{Id}
+    </select>
+    <select id="LoginByIEmail" resultType="java.lang.String">
+         SELECT role from userView where Email=#{email}
+    </select>
+
+
+</mapper>
