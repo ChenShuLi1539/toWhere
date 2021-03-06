@@ -39,7 +39,9 @@ public class Game {
                 "实现梦想","在你的最后一个回合结束时你至少拥有一件名品",5.0,skills));
     }
 
-    public void GameInit () {
-
+    public void GameInit (int num,List<String> names,List<Integer> ids) {
+        for (int i=0;i<num;i++) {
+            players.add(new Player(names.get(i),ids.get(i)));
+        }
     }
 }
