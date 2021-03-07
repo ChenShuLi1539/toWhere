@@ -12,6 +12,7 @@ public class Game {
     private List<Player> players=new ArrayList<>();
     private int playerNum;
     private int chosenNum=0;
+    private int year=0;//0表示小学四年级，之后每+1表示增加一年
 
     public Game () {
         this.roles=new ArrayList<>();

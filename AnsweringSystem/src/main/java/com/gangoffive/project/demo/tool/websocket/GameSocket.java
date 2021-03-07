@@ -1,6 +1,7 @@
 package com.gangoffive.project.demo.tool.websocket;
 
 import com.gangoffive.project.demo.entity.Game;
+import com.gangoffive.project.demo.entity.Player;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -10,7 +11,7 @@ import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@ServerEndpoint("/button/{sid}")
+@ServerEndpoint("/game/{sid}")
 @Component
 public class GameSocket {
     private static AtomicInteger onlineNum = new AtomicInteger();
@@ -27,6 +28,22 @@ public class GameSocket {
             e.getStackTrace();
         }
 
+    }
+
+    public void  accident () {
+
+    }
+
+    public void turnStartStage (int id) {
+        Player player=game.selectPlayerById(id);
+        if(game.getPlayers().indexOf(player)==0) {
+            game.setYear(game.getYear()+1);
+            accident();//发生特殊事件
+        }
+        if(player.getMood()<=0.0) {
+            //这个玩家已经出局，则直接进入下一个玩家的回合开始阶段
+            turnStartStage(game.getPlayers().get((game.getPlayers().indexOf(player)+1)%game.getPlayers().size()).getId());
+        }
     }
 
     @OnOpen

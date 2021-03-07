@@ -8,6 +8,7 @@ public class Target {
     private String name;
     private String description;
     private Double profit;
+    private boolean completed=false;//目标是否完成
 
     public Target (String name,String description,Double profit) {
         this.name=name;
