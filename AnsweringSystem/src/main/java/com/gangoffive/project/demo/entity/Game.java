@@ -11,6 +11,7 @@ public class Game {
     private List<Role> roles;
     private List<Player> players=new ArrayList<>();
     private int playerNum;
+    private int chosenNum=0;
 
     public Game () {
         this.roles=new ArrayList<>();
@@ -64,5 +65,70 @@ public class Game {
             maps.put(String.valueOf(players.get(i).getId()), JSONArray.fromObject(tempRole).toString());
         }
         return maps;
+    }
+
+    public Player selectPlayerById (int id) {
+        for (Player e:players) {
+            if (e.getId()==id)
+                return e;
+        }
+        return null;
+    }
+
+    public Role selectRoleByName (String name) {
+        for (Role e:roles) {
+            if (e.getName().equals(name))
+                return e;
+        }
+        return null;
+    }
+
+    public List<Integer> randomProject () {
+        //用于产生随机数来判断喜欢和讨厌的项目
+        int sum=0;
+        for(BigProject e:players.get(1).getBigProjects()) {
+            sum+=e.getSmallProjects().size();
+        }
+        List<Integer> list=new ArrayList<>();
+        while (list.size()!=6) {
+            int i=1+(int)(Math.random()*sum);
+            boolean existed=false;
+            for(Integer e:list) {
+                if(i==e) {
+                    existed=true;
+                    break;
+                }
+            }
+            if(!existed) {
+                list.add(i);
+            }
+        }
+        return list;
+    }
+
+    public void randomEagerness (Player player,List<Integer> list) {
+        for (int i=0;i<6;i++) {
+            int num=list.get(i);
+            for (BigProject e:player.getBigProjects()) {
+                if(num>e.getSmallProjects().size())
+                    num-=e.getSmallProjects().size();
+                else {
+                    switch (i) {
+                        case 0:e.getSmallProjects().get(num-1).setEagerness(3);break;
+                        case 1:
+                        case 2:e.getSmallProjects().get(num-1).setEagerness(2);break;
+                        default:e.getSmallProjects().get(num-1).setEagerness(0);break;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    public boolean chooseRole (int id,String name) {
+        chosenNum++;
+        selectPlayerById(id).setRole(selectRoleByName(name));//玩家挑选自己的角色
+        randomEagerness(selectPlayerById(id),randomProject());
+        return chosenNum == playerNum;
     }
 }

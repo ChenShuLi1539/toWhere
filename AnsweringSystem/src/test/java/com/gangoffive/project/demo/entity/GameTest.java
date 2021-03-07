@@ -13,8 +13,16 @@ class GameTest {
     Game game = new Game();
     @Test
     void getRoles() {
-        List<Role> roles=game.getRoles();
-        System.out.println(JSONObject.fromObject(roles.get(2)));
+        List<Integer> list=new ArrayList<>();
+        list.add(1);
+        list.add(2);
+        List<String> list2=new ArrayList<>();
+        list2.add("1");
+        list2.add("2");
+        game.gameInit(2,list2,list);
+        List<Player> players=game.getPlayers();
+        game.randomEagerness(players.get(1),game.randomProject());
+        System.out.println(players.get(1).getBigProjects());
     }
 
     @Test

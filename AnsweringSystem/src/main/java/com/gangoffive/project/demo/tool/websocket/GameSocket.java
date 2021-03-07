@@ -41,6 +41,8 @@ public class GameSocket {
         System.out.println(message);
         switch (message) {
             case "gameStart": game.gameInit(0,null,null);break;
+            case "chooseRole":boolean AllChosen=game.chooseRole(0,null);
+                    if (AllChosen) ;break;
         }
     }
 
