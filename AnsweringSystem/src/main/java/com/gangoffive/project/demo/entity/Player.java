@@ -12,6 +12,8 @@ public class Player {
     private Role role;
     private Double mood=8.0;
     private List<BigProject> bigProjects=new ArrayList<>();
+    private List<Card> cards=new ArrayList<>();
+    private int usedCardsNum=0;
 
     public Player (String name,int id) {
         this.name=name;

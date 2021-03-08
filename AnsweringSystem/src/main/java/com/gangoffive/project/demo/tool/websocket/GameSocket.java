@@ -2,6 +2,7 @@ package com.gangoffive.project.demo.tool.websocket;
 
 import com.gangoffive.project.demo.entity.Game;
 import com.gangoffive.project.demo.entity.Player;
+import com.gangoffive.project.demo.entity.Skill;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -44,6 +45,31 @@ public class GameSocket {
             //这个玩家已经出局，则直接进入下一个玩家的回合开始阶段
             turnStartStage(game.getPlayers().get((game.getPlayers().indexOf(player)+1)%game.getPlayers().size()).getId());
         }
+        if(game.getYear()==13) {
+            //大学毕业，游戏结算
+        }else {
+            //向前端询问这个人物是否有主动技能
+        }
+    }
+
+    public void sendAllPlayerMessage () {
+        //向前端发送更新后的游戏信息
+    }
+
+    public void drawCard (Player player) {
+        game.drawCard(player);
+        //发送抽牌信息
+    }
+
+    public void drawCardStage (int id) {
+        Player player=game.selectPlayerById(id);
+        for (Skill e:player.getRole().getSkills()) {
+            switch (e.getName()) {
+                case "容光焕发":if (player.getMood()>game.averageMood()) {drawCard(player);}
+            }
+        }
+        drawCard(player);
+        drawCard(player);
     }
 
     @OnOpen
@@ -59,7 +85,9 @@ public class GameSocket {
         switch (message) {
             case "gameStart": game.gameInit(0,null,null);break;
             case "chooseRole":boolean AllChosen=game.chooseRole(0,null);
-                    if (AllChosen) ;break;
+                    if (AllChosen) turnStartStage(game.getPlayers().get(0).getId());break;
+            case "turnStartStage": break;
+            case "drawCardsStage": break;
         }
     }
 

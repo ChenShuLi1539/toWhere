@@ -9,12 +9,19 @@ import java.util.*;
 @Data
 public class Game {
     private List<Role> roles;
+    private List<Card> cards;
+    private List<Card> usedCards=new ArrayList<>();
     private List<Player> players=new ArrayList<>();
     private int playerNum;
     private int chosenNum=0;
     private int year=0;//0表示小学四年级，之后每+1表示增加一年
 
     public Game () {
+        roleInit();
+        cardInit();
+    }
+
+    public void roleInit () {
         this.roles=new ArrayList<>();
         List<Skill> skills=new ArrayList<>();
         skills.add(new Skill("幕后黑手","在你使用【计策牌】后，你的心情值+0.5"));
@@ -41,6 +48,34 @@ public class Game {
         skills.add(new Skill("文思泉涌","在你的回合开始时，如果你的心情值达到了15及以上，从剩余的牌堆中抽取一张【名品牌】"));
         this.roles.add(new Role("陈树力",1,2,1,2,1,3,2,
                 "实现梦想","在你的最后一个回合结束时你至少拥有一件名品",5.0,skills));
+        skills=new ArrayList<>();
+        skills.add(new Skill("容光焕发","摸牌阶段，如果你的心情值高于全场的平均值，你本回合的抽牌数+1"));
+        skills.add(new Skill("否极泰来","弃牌阶段，如果你丢弃了超过三张牌，你的所有天性+1"));
+        this.roles.add(new Role("廖纪童",1,2,0,1,2,1,2,
+                "随心所欲","在你的最后一个回合结束时，你至少已经打出了40张牌",5.0,skills));
+    }
+
+    public void cardInit () {
+        this.cards=new ArrayList<>();
+        for (int i=0;i<6;i++) {
+            cards.add(new Card("学习体育",0,"学习体育兴趣的卡牌"));
+            cards.add(new Card("学习音乐",0,"学习音乐兴趣的卡牌"));
+            cards.add(new Card("学习文学",0,"学习文学兴趣的卡牌"));
+            cards.add(new Card("学习美术",0,"学习美术兴趣的卡牌"));
+            cards.add(new Card("学习自然",0,"学习自然兴趣的卡牌"));
+            cards.add(new Card("学习生活",0,"学习生活兴趣的卡牌"));
+        }
+        for (int i=0;i<2;i++) {
+            cards.add(new Card("恶作剧",3,"需要玩家的顽皮天性>4才能使用。对场上一名玩家使用，使其下个回合的抽牌数-1。"));
+            cards.add(new Card("整蛊",3,"需要玩家的顽皮天性>7才能使用。对场上一名玩家使用，使其下个回合的抽牌数-1，你自己抽一张牌。"));
+            cards.add(new Card("振奋",3,"需要玩家的勇敢天性>1才能使用。对场上一名玩家使用，清除其身上的所有负面效果。"));
+            cards.add(new Card("共渡难关",3,"需要玩家的勇敢天性>6才能使用。对场上除你之外一名玩家使用，对方增加2.0心情值，你增加1.0心情值。"));
+            cards.add(new Card("灵感",3,"需要玩家的聪颖天性>4才能使用。对场上一名玩家使用，使其下个回合抽牌数+1。"));
+            cards.add(new Card("无独有偶",3,"需要玩家的聪颖天性>6才能使用。你抽两张牌。"));
+            cards.add(new Card("底力爆发",3,"需要玩家的坚韧天性>2才能使用。如果你的心情值低于5.0，那么你立即增加3.0心情值。"));
+            cards.add(new Card("柳暗花明",3,"需要玩家的坚韧天性>8才能使用。对场上一名玩家使用，如果其心情值低于8.0，那么立刻将其心情值增加至8.0。"));
+        }
+        Collections.shuffle(cards);
     }
 
     public void gameInit (int num,List<String> names,List<Integer> ids) {
@@ -131,5 +166,23 @@ public class Game {
         selectPlayerById(id).setRole(selectRoleByName(name));//玩家挑选自己的角色
         randomEagerness(selectPlayerById(id),randomProject());
         return chosenNum == playerNum;
+    }
+
+    public double averageMood () {
+        double ave=0.0;
+        for(Player e:players) {
+            ave+=e.getMood();
+        }
+        ave/=players.size();
+        return ave;
+    }
+
+    public void drawCard (Player player) {
+        if(cards.size()<1) {
+            cards.addAll(usedCards);
+            Collections.shuffle(cards);
+        }
+        player.getCards().add(cards.get(0));
+        cards.remove(0);
     }
 }
