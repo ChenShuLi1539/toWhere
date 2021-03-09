@@ -61,6 +61,11 @@ public class GameSocket {
         //发送抽牌信息
     }
 
+    public void disCard (Player player) {
+        game.disCard(player);
+        //发送弃牌信息
+    }
+
     public void drawCardStage (int id) {
         Player player=game.selectPlayerById(id);
         for (Skill e:player.getRole().getSkills()) {
@@ -70,6 +75,21 @@ public class GameSocket {
         }
         drawCard(player);
         drawCard(player);
+    }
+
+    public void disCardStage (int id) {
+        Player player=game.selectPlayerById(id);
+        disCard(player);
+    }
+
+    public void studyCard (Player player1,Player player2,String name,int level) {
+        boolean isSuccess=game.studyCard(player1,player2,name,level);
+        if (isSuccess){
+            //发送成功信息
+        } else {
+            //发送失败信息
+        }
+        sendAllPlayerMessage();
     }
 
     @OnOpen
@@ -85,9 +105,11 @@ public class GameSocket {
         switch (message) {
             case "gameStart": game.gameInit(0,null,null);break;
             case "chooseRole":boolean AllChosen=game.chooseRole(0,null);
-                    if (AllChosen) turnStartStage(game.getPlayers().get(0).getId());break;
+                if (AllChosen) turnStartStage(game.getPlayers().get(0).getId());break;
             case "turnStartStage": break;
             case "drawCardsStage": break;
+            case "disCardStage": break;
+            case "学习牌":studyCard(null,null,"项目直接的名字",0);break;
         }
     }
 

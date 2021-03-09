@@ -53,6 +53,15 @@ public class Game {
         skills.add(new Skill("否极泰来","弃牌阶段，如果你丢弃了超过三张牌，你的所有天性+1"));
         this.roles.add(new Role("廖纪童",1,2,0,1,2,1,2,
                 "随心所欲","在你的最后一个回合结束时，你至少已经打出了40张牌",5.0,skills));
+        skills=new ArrayList<>();
+        skills.add(new Skill("再生力","你的回合开始时，如果你的心情值低于全场的平均值，你的心情值+0.5"));
+        skills.add(new Skill("熟能生巧","出牌阶段，你可以消耗1.0心情值，对场上任意一名玩家使用，使其下回合通过【学习牌】获得的熟练度+1"));
+        this.roles.add(new Role("杨礼政",1,2,2,0,2,3,2,
+                "世界和平","在你的最后一个回合结束时场上没有人因为心情值降为0而出局",5.0,skills));
+        skills=new ArrayList<>();
+        skills.add(new Skill("醉生梦死","出牌阶段，你可以丢弃一定数量的牌，根据丢弃的牌的数量决定接下来效果发生的次数：使你下一位玩家的心情值减少0.3，如果还丢弃有牌，则使该角色的往后第二位玩家心情值增加0.6，如果还丢弃有牌，则是该角色的往后第三位玩家心情值降低0.9，以此类推。每回合限一次\n"));
+        this.roles.add(new Role("覃思宁",1,3,1,2,1,1,1,
+                "生而活","在你的最后一个回合结束时，你至少有两个项目熟练度达到C及以上",5.0,skills));
     }
 
     public void cardInit () {
@@ -184,5 +193,210 @@ public class Game {
         }
         player.getCards().add(cards.get(0));
         cards.remove(0);
+    }
+
+    public void disCard (Player player) {
+        usedCards.addAll(player.getCards());
+        player.getCards().clear();
+    }
+
+    public SmallProject selectSmallProjectByName (Player player,String name) {
+        for (BigProject E:player.getBigProjects()) {
+            for (SmallProject e:E.getSmallProjects()) {
+                if(e.getName().equals(name))
+                    return e;
+            }
+        }
+        return null;
+    }
+
+    public double mathRound (double a) {
+        return (double)Math.round(a*10)/10;
+    }
+
+    public double caculateMatery (Player player,String name) {
+        SmallProject smallProject=selectSmallProjectByName(player,name);
+        double mastery=smallProject.getMastery();
+        int eagerness=smallProject.getEagerness();
+        //
+        //这里先单独计算加减
+        if (eagerness==0) mastery-=5.0;
+        //
+        //
+        //这里计算兴趣是否会上升等级
+        //
+        //
+        //这里计算百分比
+        switch (eagerness) {
+            case 0:mastery*=0.85;mastery=mathRound(mastery);break;
+            case 2:mastery*=1.1;mastery=mathRound(mastery);break;
+            case 3:mastery*=1.3;mastery=mathRound(mastery);break;
+        }
+        //
+        return mastery;
+    }
+
+    public void caculateExpectation (Player player,SmallProject smallProject,int level,boolean isSuccess) {
+        double expectation=smallProject.getExpectation();
+        if (isSuccess) {
+            switch (level) {
+                case 0:expectation-=0.8;break;
+                case 1:expectation-=1.5;break;
+                case 2:expectation-=2.0;break;
+                case 3:expectation-=3.1;break;
+                case 4:expectation-=4.3;break;
+                case 5:expectation-=5.0;break;
+            }
+            //其他影响期待值的技能
+            if (expectation<0.0)
+                expectation=0.0;
+        }else {
+            switch (level) {
+                case 0:expectation+=0.8;break;
+                case 1:expectation+=0.9;break;
+                case 2:expectation+=1.2;break;
+                case 3:expectation+=1.9;break;
+                case 4:expectation+=2.6;break;
+                case 5:expectation+=3.0;break;
+            }
+            //其他影响期待值的技能
+            if (expectation>5.0)
+                expectation=5.0;
+        }
+        smallProject.setExpectation(expectation);
+
+    }
+
+    public void caculateMasteryUp (Player player,SmallProject smallProject,int level) {
+        double mastery=smallProject.getMastery();
+        switch (level) {
+            case 0:mastery+=2.0;break;
+            case 1:mastery+=3.0;break;
+            case 2:mastery+=4.0;break;
+            case 3:mastery+=5.0;break;
+            case 4:mastery+=6.0;break;
+            case 5:mastery+=7.0;break;
+        }
+        //其他影响熟练度的技能
+        if (mastery>50.0)
+            mastery=50.0;
+        smallProject.setMastery(mastery);
+    }
+
+    public void studySuccess (Player player,String name,int level) {
+        SmallProject smallProject=selectSmallProjectByName(player,name);
+        //先计算心情值
+        switch (level) {
+            case 0:
+                player.setMood(mathRound(player.getMood()+0.8*(1.0+smallProject.getExpectation()/10)));
+                caculateExpectation(player,smallProject,level,true);
+                break;
+            case 1:
+                player.setMood(mathRound(player.getMood()+1.8*(1.0+smallProject.getExpectation()/10)));
+                caculateExpectation(player,smallProject,level,true);
+                break;
+            case 2:
+                player.setMood(mathRound(player.getMood()+3.1*(1.0+smallProject.getExpectation()/10)));
+                caculateExpectation(player,smallProject,level,true);
+                break;
+            case 3:
+                player.setMood(mathRound(player.getMood()+4.0*(1.0+smallProject.getExpectation()/10)));
+                caculateExpectation(player,smallProject,level,true);
+                break;
+            case 4:
+                player.setMood(mathRound(player.getMood()+5.0*(1.0+smallProject.getExpectation()/10)));
+                caculateExpectation(player,smallProject,level,true);
+                break;
+            case 5:
+                player.setMood(mathRound(player.getMood()+6.0*(1.0+smallProject.getExpectation()/10)));
+                caculateExpectation(player,smallProject,level,true);
+                break;
+
+        }
+        //后计算熟练度
+        caculateMasteryUp(player,smallProject,level);
+    }
+
+    public void studyFail (Player player,String name,int level) {
+        SmallProject smallProject=selectSmallProjectByName(player,name);
+        caculateExpectation(player,smallProject,level,false);
+    }
+
+    public boolean studyCard (Player player1,Player player2,String name,int level) {
+        switch (level) {
+            //0~5表示F~A
+            case 0:
+                player1.setMood(player1.getMood()-0.5);
+                if(caculateMatery(player1,name)+caculateMatery(player2,name)>=0) {
+                    studySuccess(player1,name,level);
+                    studySuccess(player2,name,level);
+                    return true;
+                }else {
+                    studyFail(player1,name,level);
+                    studyFail(player2,name,level);
+                    return false;
+                }
+            case 1:
+                player1.setMood(player1.getMood()-1.5);
+                player2.setMood(player2.getMood()-0.5);
+                if(caculateMatery(player1,name)+caculateMatery(player2,name)>=10) {
+                    studySuccess(player1,name,level);
+                    studySuccess(player2,name,level);
+                    return true;
+                }else {
+                    studyFail(player1,name,level);
+                    studyFail(player2,name,level);
+                    return false;
+                }
+            case 2:
+                player1.setMood(player1.getMood()-2.7);
+                player2.setMood(player2.getMood()-1.0);
+                if(caculateMatery(player1,name)+caculateMatery(player2,name)>=30) {
+                    studySuccess(player1,name,level);
+                    studySuccess(player2,name,level);
+                    return true;
+                }else {
+                    studyFail(player1,name,level);
+                    studyFail(player2,name,level);
+                    return false;
+                }
+            case 3:
+                player1.setMood(player1.getMood()-3.5);
+                player2.setMood(player2.getMood()-2.0);
+                if(caculateMatery(player1,name)+caculateMatery(player2,name)>=55) {
+                    studySuccess(player1,name,level);
+                    studySuccess(player2,name,level);
+                    return true;
+                }else {
+                    studyFail(player1,name,level);
+                    studyFail(player2,name,level);
+                    return false;
+                }
+            case 4:
+                player1.setMood(player1.getMood()-4.4);
+                player2.setMood(player2.getMood()-3.0);
+                if(caculateMatery(player1,name)+caculateMatery(player2,name)>=75) {
+                    studySuccess(player1,name,level);
+                    studySuccess(player2,name,level);
+                    return true;
+                }else {
+                    studyFail(player1,name,level);
+                    studyFail(player2,name,level);
+                    return false;
+                }
+            case 5:
+                player1.setMood(player1.getMood()-5.3);
+                player2.setMood(player2.getMood()-4.0);
+                if(caculateMatery(player1,name)+caculateMatery(player2,name)>=90) {
+                    studySuccess(player1,name,level);
+                    studySuccess(player2,name,level);
+                    return true;
+                }else {
+                    studyFail(player1,name,level);
+                    studyFail(player2,name,level);
+                    return false;
+                }
+            default:return false;
+        }
     }
 }
