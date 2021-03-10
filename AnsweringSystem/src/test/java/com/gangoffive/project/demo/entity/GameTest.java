@@ -40,6 +40,11 @@ class GameTest {
 //            }
 //        }
 //        System.out.println(list);
+        Player player=new Player("?",1);
+        Player temp=player;
+        temp.setName("123");
+        System.out.println(temp);
+        System.out.println(player);
     }
 
     @Test

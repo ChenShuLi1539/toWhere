@@ -88,6 +88,15 @@ public class Game {
             cards.add(new Card("留一手",3,"需要玩家的谨慎天性>3才能使用。对场上一名玩家使用，使其下回合学习失败时获得的期待值增加0.5。"));
             cards.add(new Card("潜心修学",3,"需要玩家的谨慎天性>8才能使用。你的谨慎天性每比顽皮天性高出1点，抽一张牌。"));
         }
+        for (int i=0;i<1;i++) {
+            cards.add(new Card("提升聪颖",4,"聪颖+1。"));
+            cards.add(new Card("提升勇敢",4,"勇敢+1。"));
+            cards.add(new Card("提升顽皮",4,"顽皮+1。"));
+            cards.add(new Card("提升细腻",4,"细腻+1。"));
+            cards.add(new Card("提升坚韧",4,"坚韧+1。"));
+            cards.add(new Card("提升谨慎",4,"谨慎+1。"));
+            cards.add(new Card("提升兴趣",4,"使随机一个兴趣上升一层。"));
+        }
         Collections.shuffle(cards);
     }
 
@@ -264,6 +273,8 @@ public class Game {
                 case 5:expectation+=3.0;break;
             }
             //其他影响期待值的技能
+            if(haveThisBuff(player,"不服输"))
+                expectation+=0.5;
             if (expectation>5.0)
                 expectation=5.0;
         }
@@ -317,6 +328,8 @@ public class Game {
                 break;
 
         }
+        if(haveThisBuff(player,"愉悦"))
+            player.setMood(player.getMood()+0.3);
         //后计算熟练度
         caculateMasteryUp(player,smallProject,level);
     }
@@ -406,6 +419,14 @@ public class Game {
                 }
             default:return false;
         }
+    }
+
+    public boolean haveThisBuff (Player player,String name) {
+        for (Buff e:player.getBuffs()) {
+            if (e.getName().equals(name))
+                return true;
+        }
+        return false;
     }
 
 }

@@ -1,9 +1,6 @@
 package com.gangoffive.project.demo.tool.websocket;
 
-import com.gangoffive.project.demo.entity.Buff;
-import com.gangoffive.project.demo.entity.Game;
-import com.gangoffive.project.demo.entity.Player;
-import com.gangoffive.project.demo.entity.Skill;
+import com.gangoffive.project.demo.entity.*;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -70,13 +67,16 @@ public class GameSocket {
 
     public void drawCardStage (int id) {
         Player player=game.selectPlayerById(id);
-        for (Skill e:player.getRole().getSkills()) {
-            switch (e.getName()) {
-                case "容光焕发":if (player.getMood()>game.averageMood()) {drawCard(player);}
-            }
-        }
-        drawCard(player);
-        drawCard(player);
+        int drawCardTimes=5;
+        if(haveThisSkill(player,"容光焕发"))
+            if(player.getMood()>game.averageMood())
+                drawCardTimes++;
+        if(haveThisBuff(player,"慌张"))
+            drawCardTimes--;
+        if(haveThisBuff(player,"怡然"))
+            drawCardTimes++;
+        for (int i=0;i<drawCardTimes;i++)
+            drawCard(player);
     }
 
     public void disCardStage (int id) {
@@ -96,6 +96,14 @@ public class GameSocket {
 
     public boolean haveThisBuff (Player player,String name) {
         for (Buff e:player.getBuffs()) {
+            if (e.getName().equals(name))
+                return true;
+        }
+        return false;
+    }
+
+    public boolean haveThisSkill (Player player,String name) {
+        for (Skill e:player.getRole().getSkills()) {
             if (e.getName().equals(name))
                 return true;
         }
@@ -144,6 +152,32 @@ public class GameSocket {
         sendAllPlayerMessage();
     }
 
+    public void luckyCard (int id,String name) {
+        Player player=game.selectPlayerById(id);
+        switch (name) {
+            case "提升聪颖":player.getRole().getNatures().get(0).setLevel(player.getRole().getNatures().get(0).getLevel()+1);break;
+            case "提升勇敢":player.getRole().getNatures().get(1).setLevel(player.getRole().getNatures().get(1).getLevel()+1);break;
+            case "提升顽皮":player.getRole().getNatures().get(2).setLevel(player.getRole().getNatures().get(2).getLevel()+1);break;
+            case "提升细腻":player.getRole().getNatures().get(3).setLevel(player.getRole().getNatures().get(3).getLevel()+1);break;
+            case "提升坚韧":player.getRole().getNatures().get(4).setLevel(player.getRole().getNatures().get(4).getLevel()+1);break;
+            case "提升谨慎":player.getRole().getNatures().get(5).setLevel(player.getRole().getNatures().get(5).getLevel()+1);break;
+            case "提升兴趣":int sum=0;
+                for(BigProject e:game.getPlayers().get(1).getBigProjects()) {
+                    sum+=e.getSmallProjects().size();
+                }
+                int i=1+(int)(Math.random()*sum);
+                for (BigProject e:player.getBigProjects()) {
+                    if(sum>e.getSmallProjects().size())
+                        sum-=e.getSmallProjects().size();
+                    else {
+                        if(e.getSmallProjects().get(sum-1).getEagerness()!=3)
+                            e.getSmallProjects().get(sum-1).setEagerness(e.getSmallProjects().get(sum-1).getEagerness()+1);
+                        break;
+                    }
+                }break;
+        }
+    }
+
     public void turnOverStage (int id) {
         Player player=game.selectPlayerById(id);
         for (Buff e:player.getBuffs()) {
@@ -176,8 +210,9 @@ public class GameSocket {
             case "drawCardsStage": drawCardStage(0);break;
             case "disCardStage": disCardStage(0);break;
             case "学习牌":studyCard(0,0,"项目直接的名字",0);break;
-            case "计策牌":
-            case "turnOverStage":turnOverStage(0);
+            case "计策牌":trickCard(0,0,"卡牌的名字");break;
+            case "机缘牌":luckyCard(0,"卡牌的名字");break;
+            case "turnOverStage":turnOverStage(0);break;
         }
     }
 
