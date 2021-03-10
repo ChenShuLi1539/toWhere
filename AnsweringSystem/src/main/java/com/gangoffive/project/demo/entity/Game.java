@@ -83,6 +83,10 @@ public class Game {
             cards.add(new Card("无独有偶",3,"需要玩家的聪颖天性>6才能使用。你抽两张牌。"));
             cards.add(new Card("底力爆发",3,"需要玩家的坚韧天性>2才能使用。如果你的心情值低于5.0，那么你立即增加3.0心情值。"));
             cards.add(new Card("柳暗花明",3,"需要玩家的坚韧天性>8才能使用。对场上一名玩家使用，如果其心情值低于8.0，那么立刻将其心情值增加至8.0。"));
+            cards.add(new Card("深呼吸",3,"需要玩家的细腻天性>5才能使用。对场上一名玩家使用，使其下一回合学习成功时获得的心情值增加0.3。"));
+            cards.add(new Card("赠人玫瑰",3,"需要玩家的细腻天性>7才能使用。对场上除你之外一名玩家使用，将你当前的手牌转移给对方，每转移一张牌，你的心情值增加0.5。"));
+            cards.add(new Card("留一手",3,"需要玩家的谨慎天性>3才能使用。对场上一名玩家使用，使其下回合学习失败时获得的期待值增加0.5。"));
+            cards.add(new Card("潜心修学",3,"需要玩家的谨慎天性>8才能使用。你的谨慎天性每比顽皮天性高出1点，抽一张牌。"));
         }
         Collections.shuffle(cards);
     }
@@ -323,6 +327,10 @@ public class Game {
     }
 
     public boolean studyCard (Player player1,Player player2,String name,int level) {
+        //
+        //先把牌删除
+        //
+        player1.setUsedCardsNum(player1.getUsedCardsNum()+1);
         switch (level) {
             //0~5表示F~A
             case 0:
@@ -399,4 +407,5 @@ public class Game {
             default:return false;
         }
     }
+
 }

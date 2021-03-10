@@ -23,11 +23,23 @@ class GameTest {
 //        List<Player> players=game.getPlayers();
 //        game.randomEagerness(players.get(1),game.randomProject());
 //        System.out.println(players.get(1).getBigProjects());
-         double a=1.2;
-         double b=a;
-         b+=1.1;
-         System.out.println(a);
-         System.out.println(b);
+
+
+//        List<String> list = new ArrayList<>();
+//        list.add("male");
+//        list.add("female");
+//        list.add("female");
+//        list.add("male");
+//
+//        //遍历删除,除去男生
+//        Iterator<String> iterator = list.iterator();
+//        while (iterator.hasNext()) {
+//            String a = iterator.next();
+//            if ("male".equals(a)) {
+//                iterator.remove();//使用迭代器的删除方法删除
+//            }
+//        }
+//        System.out.println(list);
     }
 
     @Test
