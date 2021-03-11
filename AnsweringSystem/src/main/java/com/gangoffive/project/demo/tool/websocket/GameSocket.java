@@ -1,13 +1,13 @@
 package com.gangoffive.project.demo.tool.websocket;
 
-import com.gangoffive.project.demo.entity.Game;
-import com.gangoffive.project.demo.entity.Player;
+import com.gangoffive.project.demo.entity.*;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -44,6 +44,152 @@ public class GameSocket {
             //这个玩家已经出局，则直接进入下一个玩家的回合开始阶段
             turnStartStage(game.getPlayers().get((game.getPlayers().indexOf(player)+1)%game.getPlayers().size()).getId());
         }
+        if(game.getYear()==13) {
+            //大学毕业，游戏结算
+        }else {
+            //向前端询问这个人物是否有主动技能
+        }
+    }
+
+    public void sendAllPlayerMessage () {
+        //向前端发送更新后的游戏信息
+    }
+
+    public void drawCard (Player player) {
+        game.drawCard(player);
+        //发送抽牌信息
+    }
+
+    public void disCard (Player player) {
+        game.disCard(player);
+        //发送弃牌信息
+    }
+
+    public void drawCardStage (int id) {
+        Player player=game.selectPlayerById(id);
+        int drawCardTimes=5;
+        if(haveThisSkill(player,"容光焕发"))
+            if(player.getMood()>game.averageMood())
+                drawCardTimes++;
+        if(haveThisBuff(player,"慌张"))
+            drawCardTimes--;
+        if(haveThisBuff(player,"怡然"))
+            drawCardTimes++;
+        for (int i=0;i<drawCardTimes;i++)
+            drawCard(player);
+    }
+
+    public void disCardStage (int id) {
+        Player player=game.selectPlayerById(id);
+        disCard(player);
+    }
+
+    public void studyCard (int  id1,int  id2,String name,int level) {
+        boolean isSuccess=game.studyCard(game.selectPlayerById(id1),game.selectPlayerById(id2),name,level);
+        if (isSuccess){
+            //发送成功信息
+        } else {
+            //发送失败信息
+        }
+        sendAllPlayerMessage();
+    }
+
+    public boolean haveThisBuff (Player player,String name) {
+        for (Buff e:player.getBuffs()) {
+            if (e.getName().equals(name))
+                return true;
+        }
+        return false;
+    }
+
+    public boolean haveThisSkill (Player player,String name) {
+        for (Skill e:player.getRole().getSkills()) {
+            if (e.getName().equals(name))
+                return true;
+        }
+        return false;
+    }
+
+    public void addBuff (Player player,String name,String description,int lastTurns,boolean isBeneficial) {
+        if (haveThisBuff(player,name)) {
+            for (Buff e:player.getBuffs()) {
+                if (e.getName().equals(name))
+                    e.setLastTurns(lastTurns);
+            }
+        }else {
+            player.getBuffs().add(new Buff(name,description,lastTurns,isBeneficial));
+        }
+    }
+
+    public void trickCard (int id1,int id2,String name) {
+        Player player1=game.selectPlayerById(id1);
+        Player player2=game.selectPlayerById(id2);
+        //
+        //先把牌删除
+        //
+        player1.setUsedCardsNum(player1.getUsedCardsNum()+1);
+        switch (name) {
+            case "恶作剧":addBuff(player2,"慌张","抽牌数-1",1,false);break;
+            case "整蛊":addBuff(player2,"慌张","抽牌数-1",1,false);drawCard(player1);break;
+            case "振奋":Iterator<Buff> iterator = player2.getBuffs().iterator();
+                    while (iterator.hasNext()) {
+                        Buff a = iterator.next();
+                        if (!a.isBeneficial()) {
+                            iterator.remove();//使用迭代器的删除方法删除
+                        }
+                    }break;
+            case "共渡难关":player2.setMood(player2.getMood()+2.0);player1.setMood(player1.getMood()+1.0);break;
+            case "灵感":addBuff(player2,"怡然","抽牌数+1",1,true);break;
+            case "无独有偶":drawCard(player1);drawCard(player1);break;
+            case "底力爆发":if (player1.getMood()<5.0) player1.setMood(player1.getMood()+3.0);break;
+            case "柳暗花明":if (player2.getMood()<8.0) player2.setMood(8.0);break;
+            case "深呼吸":addBuff(player2,"愉悦","学习成功时获得的心情值+0.3",1,true);break;
+            case "赠人玫瑰":player1.setMood(player1.getMood()+0.5*player1.getCards().size());player2.getCards().addAll(player1.getCards());player1.getCards().clear();break;
+            case "留一手":addBuff(player2,"不服输","学习失败时获得的期待值+0.3",1,true);break;
+            case "潜心修学":for (int i=0;i<player1.getRole().getNatures().get(5).getLevel()-player1.getRole().getNatures().get(2).getLevel();i++)
+                drawCard(player1);break;
+        }
+        sendAllPlayerMessage();
+    }
+
+    public void luckyCard (int id,String name) {
+        Player player=game.selectPlayerById(id);
+        switch (name) {
+            case "提升聪颖":player.getRole().getNatures().get(0).setLevel(player.getRole().getNatures().get(0).getLevel()+1);break;
+            case "提升勇敢":player.getRole().getNatures().get(1).setLevel(player.getRole().getNatures().get(1).getLevel()+1);break;
+            case "提升顽皮":player.getRole().getNatures().get(2).setLevel(player.getRole().getNatures().get(2).getLevel()+1);break;
+            case "提升细腻":player.getRole().getNatures().get(3).setLevel(player.getRole().getNatures().get(3).getLevel()+1);break;
+            case "提升坚韧":player.getRole().getNatures().get(4).setLevel(player.getRole().getNatures().get(4).getLevel()+1);break;
+            case "提升谨慎":player.getRole().getNatures().get(5).setLevel(player.getRole().getNatures().get(5).getLevel()+1);break;
+            case "提升兴趣":int sum=0;
+                for(BigProject e:game.getPlayers().get(1).getBigProjects()) {
+                    sum+=e.getSmallProjects().size();
+                }
+                int i=1+(int)(Math.random()*sum);
+                for (BigProject e:player.getBigProjects()) {
+                    if(sum>e.getSmallProjects().size())
+                        sum-=e.getSmallProjects().size();
+                    else {
+                        if(e.getSmallProjects().get(sum-1).getEagerness()!=3)
+                            e.getSmallProjects().get(sum-1).setEagerness(e.getSmallProjects().get(sum-1).getEagerness()+1);
+                        break;
+                    }
+                }break;
+        }
+    }
+
+    public void turnOverStage (int id) {
+        Player player=game.selectPlayerById(id);
+        for (Buff e:player.getBuffs()) {
+            e.setLastTurns(e.getLastTurns()-1);
+        }
+        Iterator<Buff> iterator = player.getBuffs().iterator();
+        while (iterator.hasNext()) {
+            Buff a = iterator.next();
+            if (a.getLastTurns()<1) {
+                iterator.remove();//使用迭代器的删除方法删除
+            }
+        }
     }
 
     @OnOpen
@@ -59,7 +205,14 @@ public class GameSocket {
         switch (message) {
             case "gameStart": game.gameInit(0,null,null);break;
             case "chooseRole":boolean AllChosen=game.chooseRole(0,null);
-                    if (AllChosen) ;break;
+                if (AllChosen) turnStartStage(game.getPlayers().get(0).getId());break;
+            case "turnStartStage": turnStartStage(0);break;
+            case "drawCardsStage": drawCardStage(0);break;
+            case "disCardStage": disCardStage(0);break;
+            case "学习牌":studyCard(0,0,"项目直接的名字",0);break;
+            case "计策牌":trickCard(0,0,"卡牌的名字");break;
+            case "机缘牌":luckyCard(0,"卡牌的名字");break;
+            case "turnOverStage":turnOverStage(0);break;
         }
     }
 
