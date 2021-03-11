@@ -4,10 +4,10 @@
     <div class="login-body-right-bar"></div>
     <div class="login-body-right-context">
       <div class="login-input">
-        <label class="login-label">用户名:</label>
+        <label class="login-label">账号：</label>
         <el-input
-          placeholder="请输入学号/工号/邮箱"
-          v-model="username">
+          placeholder="请输入账号"
+          v-model="account">
         </el-input>
       </div>
       <div class="login-input">
@@ -33,7 +33,7 @@ export default {
   name: 'loginMenu',
   data: function () {
     return {
-      username: '',
+      account: '',
       password: '',
       identity: ''
     }
@@ -41,8 +41,8 @@ export default {
   methods: {
     checkInput: function () {
       let message
-      if (this.username === '') {
-        message = '用户名不能为空'
+      if (this.account === '') {
+        message = '账号不能为空'
       } else if (this.password === '') {
         message = '密码不能为空！'
       } else {
@@ -57,10 +57,10 @@ export default {
     buttonClicked: function () {
       // console.log('使用用户名：' + this.username + '\n密码：' + this.password)
       if (this.checkInput()) {
-        const IdOrEmail = this.username
+        const account = this.account
         const password = this.password
         axios
-          .post(this.$store.state.HTTPBaseURL + '/loginRegist/login/', { IdOrEmail, password })
+          .post(this.$store.state.HTTPBaseURL + '/account/login/', { account, password })
           .then(resp => {
             const { data, status } = resp
             console.log(data)
@@ -68,32 +68,23 @@ export default {
             // 如果正确，保存cookie
             if (status === 200) {
               let status
-              if (data === '学生') {
-                this.identity = 'S'
-                status = true
-              } else if (data === '老师') {
-                this.identity = 'T'
-                status = true
-              } else if (data === '系教务老师') {
-                this.identity = 'MX'
-                status = true
-              } else if (data === '院教务老师') {
-                this.identity = 'MY'
+              if (data !== '') {
                 status = true
               } else {
                 status = false
-                this.$message.error(data)
+                this.$message.error('账号或密码错误！')
               }
               if (status) {
-                this.$cookies.set('login', this.$store.getters.encrypt(status.toString()))
-                this.$cookies.set('username', this.$store.getters.encrypt(this.username))
-                this.$cookies.set('id', this.$store.getters.encrypt(this.identity))
+                this.$cookies.set('account', this.$store.getters.encrypt(data.account))
+                this.$cookies.set('name', this.$store.getters.encrypt(data.name))
+                this.$cookies.set('id', this.$store.getters.encrypt(data.id + ''))
                 // 跳转到主页。根据身份不同跳转到不同的主页，主页create时检查cookie身份，若不对应也要跳转
-                if (this.identity === 'S') this.$router.push('home/student')
-                else if (this.identity === 'T') this.$router.push('home/teacher')
-                else if (this.identity === 'MX') this.$router.push('home/administerX')
-                else if (this.identity === 'MY') this.$router.push('home/administerY')
-                else this.$message.error('跳转出错！')
+                // if (this.identity === 'S') this.$router.push('home/student')
+                // else if (this.identity === 'T') this.$router.push('home/teacher')
+                // else if (this.identity === 'MX') this.$router.push('home/administerX')
+                // else if (this.identity === 'MY') this.$router.push('home/administerY')
+                // else this.$message.error('跳转出错！')
+                this.$router.push('game/outline')
               }
             }
           })

@@ -1,7 +1,7 @@
 <template>
   <div class="login-body">
     <div class="login-body-left" :style="{backgroundImage:'url(' + img + ')'}">
-      <div class="login-body-left-text">{{welcomeText}}<br>课程答疑系统</div>
+      <div class="login-body-left-text">{{welcomeText}}<br>向何方（toWhere）</div>
     </div>
     <div class="login-body-right">
       <component v-bind:is="currentMenu"></component>

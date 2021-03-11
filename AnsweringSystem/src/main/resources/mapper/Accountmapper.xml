@@ -6,4 +6,16 @@
     <insert id="regist">
 		call insert_player(#{account},#{password},#{name})
 	</insert>
+
+	<select id="getPlayerByAccount" resultType="com.gangoffive.project.demo.entity.Account">
+         select  * from player where account=#{account}
+    </select>
+
+	<select id="getPlayerByName" resultType="com.gangoffive.project.demo.entity.Account">
+         select  * from player where name=#{name}
+    </select>
+
+	<select id="login" resultType="com.gangoffive.project.demo.entity.Account">
+         select  * from player where account=#{account} and password=#{password}
+    </select>
 </mapper>

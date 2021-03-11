@@ -11,7 +11,7 @@ public class CorsConfig {
     private CorsConfiguration buildConfig(){
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.addAllowedHeader("*"); // 允许任何的head头部
-        corsConfiguration.addAllowedOrigin("http://localhost:8081"); // 允许任何域名使用
+        corsConfiguration.addAllowedOrigin("http://localhost:8080"); // 允许任何域名使用
         corsConfiguration.addAllowedOrigin("http://192.168.43.48:8081"); // 允许任何域名使用
         corsConfiguration.addAllowedOrigin("http://192.168.43.119:8081"); // 允许任何域名使用
         corsConfiguration.addAllowedOrigin("https://localhost:8081"); // 允许任何域名使用
