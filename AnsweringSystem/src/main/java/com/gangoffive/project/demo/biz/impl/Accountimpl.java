@@ -17,6 +17,11 @@ public class Accountimpl implements AccountBiz {
     @Override
     public String regist(Map<String, String> map) {
         String state="通过";
+        if (accountMapper.getPlayerByAccount(map.get("account"))!=null) {
+            state="该账号已被使用！";
+        } else if (accountMapper.getPlayerByName(map.get("name"))!=null) {
+            state="该昵称已被使用！";
+        }
         if (state.equals("通过")) {
             Account account=new Account();
             account.setAccount(map.get("account"));
@@ -24,8 +29,15 @@ public class Accountimpl implements AccountBiz {
             account.setName(map.get("name"));
             accountMapper.regist(account);
         } else {
-            return "该账号已被使用";
+            return state;
         }
         return "注册成功";
     }
+
+    @Override
+    public Account login(Map<String, String> map) {
+        return accountMapper.login(map.get("account"),MD5Util.MD5Pwd(map.get("account"),map.get("password")));
+    }
+
+
 }
