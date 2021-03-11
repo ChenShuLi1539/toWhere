@@ -4,24 +4,17 @@
         <div class="login-body-right-bar"></div>
         <div class="login-body-right-context">
           <div class="login-input">
-            <label class="login-label">编号:</label>
+            <label class="login-label">账号:</label>
             <el-input
-              placeholder="请输入学号/教师号"
-              v-model="id">
+              placeholder="请输入账号"
+              v-model="account">
             </el-input>
           </div>
           <div class="login-input">
-            <label class="login-label">用户名:</label>
+            <label class="login-label">游戏昵称:</label>
             <el-input
-              placeholder="请输入用户名"
-              v-model="username">
-            </el-input>
-          </div>
-          <div class="login-input">
-            <label class="login-label">邮箱:</label>
-            <el-input
-              placeholder="请输入邮箱"
-              v-model="email">
+              placeholder="请输入游戏昵称"
+              v-model="name">
             </el-input>
           </div>
           <div class="login-input">
@@ -41,10 +34,6 @@
               @keyup.enter.native="buttonClicked">
             </el-input>
           </div>
-          <div>
-            <el-radio v-model="radio" :label="1" border>我是学生</el-radio>
-            <el-radio v-model="radio" :label="2" border>我是老师</el-radio>
-          </div>
           <el-button type="primary" @click="buttonClicked()">注册</el-button>
         </div>
         <div class="login-body-right-switch">
@@ -59,9 +48,8 @@ export default {
   name: 'registerMenu',
   data: function () {
     return {
-      id: '',
-      username: '',
-      email: '',
+      account: '',
+      name: '',
       password: '',
       passwordAgain: '',
       radio: 0,
@@ -71,20 +59,14 @@ export default {
   methods: {
     checkInput: function () {
       let message
-      if (this.id === '') {
-        message = '请输入学号/教师号！'
-      } else if (this.username === '') {
-        message = '请输入用户名！'
-      } else if (this.email === '') {
-        message = '请输入邮箱！'
-      } else if (!/\w+@\w+\.\w+/.test(this.email)) {
-        message = '邮箱格式有误！'
+      if (this.account === '') {
+        message = '请输入账号！'
+      } else if (this.name === '') {
+        message = '请输入游戏昵称！'
       } else if (this.password === '') {
         message = '请输入密码！'
       } else if (this.passwordAgain === '') {
         message = '请输入确认密码！'
-      } else if (this.radio === 0) {
-        message = '请选择身份！'
       } else if (this.password !== this.passwordAgain) {
         message = '两次输入的密码不一致！'
       } else {
@@ -100,18 +82,11 @@ export default {
       // console.log('使用用户名：' + this.username + '\n密码：' + this.password)
       if (this.checkInput()) {
         // 前后端交互
-        const name = this.username
+        const account = this.account
         const password = this.password
-        const email = this.email
-        const id = this.id
-        let role
-        if (this.radio === 1) {
-          role = '学生'
-        } else {
-          role = '老师'
-        }
+        const name = this.name
         axios
-          .post(this.$store.state.HTTPBaseURL + '/loginRegist/regist/', { name, password, email, id, role })
+          .post(this.$store.state.HTTPBaseURL + '/account/regist/', { account, password, name })
           .then(resp => {
             const { data, status } = resp
             this.status = status
@@ -164,7 +139,7 @@ export default {
   width: 90px;
   line-height: normal;
   white-space: nowrap;
-  margin: 30px 20px 22px 20px;
+  margin: 30px 20px 38px 20px;
   color: gray;
   text-align: left;
 }
