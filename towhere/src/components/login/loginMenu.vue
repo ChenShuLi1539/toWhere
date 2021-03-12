@@ -84,7 +84,7 @@ export default {
                 // else if (this.identity === 'MX') this.$router.push('home/administerX')
                 // else if (this.identity === 'MY') this.$router.push('home/administerY')
                 // else this.$message.error('跳转出错！')
-                this.$router.push('game/outline')
+                this.$router.push('game/Main')
               }
             }
           })
