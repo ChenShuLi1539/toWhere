@@ -100,25 +100,26 @@ public class Game {
         Collections.shuffle(cards);
     }
 
-    public void gameInit (int num,List<String> names,List<Integer> ids) {
+    public void gameInit (int num,List<Roommate> roommates) {
         playerNum=num;
         for (int i=0;i<num;i++) {
-            players.add(new Player(names.get(i),ids.get(i)));
+            players.add(new Player(roommates.get(i).getName(),roommates.get(i).getId()));
         }
     }
 
     public Map<String,String> gameChooseRole () {
         Map<String,String> maps=new HashMap<>();
+        maps.put("type","chooseRole");
         Collections.shuffle(roles);
         for(int i=0;i<playerNum;i++) {
 //            String str=new String();
             List<Role> tempRole = new ArrayList<>();
-//            tempRole.add(roles.get(i*3));
-//            tempRole.add(roles.get(i*3+1));
-//            tempRole.add(roles.get(i*3+2));
+            tempRole.add(roles.get(i*3));
+            tempRole.add(roles.get(i*3+1));
+            tempRole.add(roles.get(i*3+2));
 //            str+=JSONObject.fromObject(roles.get(i*2));
-            tempRole.add(roles.get(i*2));
-            tempRole.add(roles.get(i*2+1));
+//            tempRole.add(roles.get(i*2));
+//            tempRole.add(roles.get(i*2+1));
 //            maps.put(String.valueOf(players.get(i).getId()), JSONArray.fromObject(tempRole).toString());
             maps.put(String.valueOf(players.get(i).getId()), JSONArray.fromObject(tempRole).toString());
         }

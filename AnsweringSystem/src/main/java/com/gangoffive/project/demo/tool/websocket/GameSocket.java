@@ -1,13 +1,15 @@
 package com.gangoffive.project.demo.tool.websocket;
 
 import com.gangoffive.project.demo.entity.*;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
-import java.util.Iterator;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -16,7 +18,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GameSocket {
     private static AtomicInteger onlineNum = new AtomicInteger();
     private static ConcurrentHashMap<String, Session> sessionPools=new ConcurrentHashMap<>();
-    private Game game= new Game();
+    private static Game game= new Game();
+    private static List<Roommate> roommates=new ArrayList<>();
 
     //    向每一个用户发送信息
     public void sendMessage(String message) throws IOException {
@@ -195,15 +198,31 @@ public class GameSocket {
     @OnOpen
     public void onOpen(Session session,@PathParam(value = "sid") int userId){
         addOnlineCount();
-        System.out.println(userId+"加入直播课堂，当前人数为"+onlineNum);
+        System.out.println(userId+"加入游戏房间，当前人数为"+onlineNum);
         sessionPools.put(String.valueOf(userId),session);
     }
 
     @OnMessage
     public void onMessage(String message) throws IOException {
         System.out.println(message);
-        switch (message) {
-            case "gameStart": game.gameInit(0,null,null);break;
+        JSONObject jsonObject = JSONObject.fromObject(message);
+        String type=jsonObject.getString("type");
+        switch (type) {
+            case "waiting": roommates.add(new Roommate(jsonObject.getInt("id"),jsonObject.getString("name")));
+                        if(roommates.size()==1)
+                            roommates.get(0).setOwner(true);
+                        Map<String,String> map=new HashMap<>();
+                        map.put("type","waiting");
+                        map.put("data", JSONArray.fromObject(roommates).toString());
+                        JSONObject jsonObject1=JSONObject.fromObject(map);
+                        sendMessage(jsonObject1.toString());break;
+            case "gameStart": game.gameInit(roommates.size(),roommates);
+                    Map<String,String> map1=new HashMap<>();
+                    map1.put("type","gameStart");
+                    JSONObject jsonObject2=JSONObject.fromObject(map1);
+                    sendMessage(jsonObject2.toString());
+                    jsonObject2=JSONObject.fromObject(game.gameChooseRole());
+                    sendMessage(jsonObject2.toString());break;
             case "chooseRole":boolean AllChosen=game.chooseRole(0,null);
                 if (AllChosen) turnStartStage(game.getPlayers().get(0).getId());break;
             case "turnStartStage": turnStartStage(0);break;
@@ -220,7 +239,19 @@ public class GameSocket {
     public void onClose(@PathParam(value = "sid") int userId){
         sessionPools.remove(String.valueOf(userId));
         subOnlineCount();
-        System.out.println(userId+"离开直播课堂，当前人数为"+onlineNum);
+        System.out.println(userId+"离开游戏房间，当前人数为"+onlineNum);
+        Iterator<Roommate> iterator = roommates.iterator();
+        boolean isOwner=false;
+        while (iterator.hasNext()) {
+            Roommate a = iterator.next();
+            if (a.getId()==userId) {
+                iterator.remove();//使用迭代器的删除方法删除
+                if(a.isOwner())
+                    isOwner=true;
+            }
+        }
+        if (isOwner&&roommates.size()>0)
+            roommates.get(0).setOwner(true);
     }
 
     @OnError
