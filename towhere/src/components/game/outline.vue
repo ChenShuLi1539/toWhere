@@ -1,28 +1,79 @@
 <template>
 <div>
-    <el-container class="gameOutline" v-show="selected==='gameRoom'">
+    <el-container class="gameOutline" v-if="selected==='gameRoom'">
     <el-header height='30px' class="header"></el-header>
     <el-main class="mainArea">
         <div class="gametable">
             <div class="chooseRoleArea" v-show="choosingRole">
                 <div class="chooseRoleArea-header">请选择你的游戏角色</div>
                 <div class="chooseRoleArea-main" >
-                    <div class="roles" v-for="(each,index) in roles" v-bind:key="index">
+                    <div class="roles" v-for="(each,index) in roles" v-bind:key="index" @click="chooseRole(index)">
                         {{each.name}}
                     </div>
                 </div>
             </div>
+            <div class="playerMessage-2players" v-if="players.length===2">
+                <div class="playerMessage-header">
+                    <div class="playerMessage-header-left">{{players[(parseInt(myIndex)+1)%players.length].name}}</div>
+                    <div class="playerMessage-header-right">❤×{{players[(parseInt(myIndex)+1)%players.length].mood}}</div>
+                </div>
+                <div class="playerMessage-role">{{players[(parseInt(myIndex)+1)%players.length].role.name}}</div>
+                <div class="playerMessage-buff"></div>
+            </div>
+
+            <div  class="playerMessage-morePlayers-top" v-if="players.length>2">
+              <div class="playerMessage" v-for="(each,index) in players" v-bind:key="index" >
+                <div v-if="index!==myIndex&&index!==parseInt(myIndex+1)%players.length&&index!==parseInt(myIndex-1)%players.length">
+                  <div class="playerMessage-header">
+                    <div class="playerMessage-header-left">{{players[index].name}}</div>
+                    <div class="playerMessage-header-right">❤×{{players[index].mood}}</div>
+                  </div>
+                  <div class="playerMessage-role">{{players[index].role.name}}</div>
+                  <div class="playerMessage-buff"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="playerMessage-morePlayers-mid" v-if="players.length>2">
+              <div class="playerMessage-morePlayers-mid-left">
+                  <div class="playerMessage-header">
+                    <div class="playerMessage-header-left">{{players[(parseInt(myIndex)+1)%players.length].name}}</div>
+                    <div class="playerMessage-header-right">❤×{{players[(parseInt(myIndex)+1)%players.length].mood}}</div>
+                  </div>
+                  <div class="playerMessage-role">{{players[(parseInt(myIndex)+1)%players.length].role.name}}</div>
+                  <div class="playerMessage-buff"></div>
+              </div>
+
+              <div class="playerMessage-morePlayers-mid-right">
+                  <div class="playerMessage-header">
+                    <div class="playerMessage-header-left">{{players[(parseInt(myIndex)-1)%players.length].name}}</div>
+                    <div class="playerMessage-header-right">❤×{{players[(parseInt(myIndex)-1)%players.length].mood}}</div>
+                  </div>
+                  <div class="playerMessage-role">{{players[(parseInt(myIndex)-1)%players.length].role.name}}</div>
+                  <div class="playerMessage-buff"></div>
+              </div>
+            </div>
         </div>
         <div class="aside"></div>
     </el-main>
-    <el-footer height='120px' class="footer">
+    <el-footer height='200px' class="footer">
         <div class="buffArea"></div>
-        <div class="cardArea"></div>
-        <div class="roleArea"></div>
+        <div class="cardArea" v-if="AllChosen">
+          <div class="card" v-for="(each,index) in players[myIndex].cards" v-bind:key="index">
+            {{each.name}}
+          </div>
+        </div>
+        <div class="roleArea">
+          <div class="roleArea-header">
+            <div class="roleArea-header-left" v-if="AllChosen">{{players[myIndex].name}}</div>
+            <div class="roleArea-header-right" v-if="AllChosen">❤×{{this.players[this.myIndex].mood}}</div>
+          </div>
+          <div class="roleArea-footer" v-if="AllChosen">{{this.players[this.myIndex].role.name}}</div>
+        </div>
     </el-footer>
     </el-container>
 
-    <div class="waitingRoom" v-show="selected==='waitingRoom'">
+    <div class="waitingRoom" v-if="selected==='waitingRoom'">
         <div class="waitingRoomArea">
             <div v-for="each in roommate" v-bind:key="each.id" class="playerMessage">
                 <div class="playerName">
@@ -30,7 +81,7 @@
                 </div>
             </div>
         </div>
-        <el-button  type="primary" round v-show="this.owner" class="gameStartButton" @click="gameStart()">开始游戏</el-button>
+        <el-button  type="primary" round v-show="this.owner&&this.roommate.length>1" class="gameStartButton" @click="gameStart()">开始游戏</el-button>
     </div>
 </div>
 
@@ -47,7 +98,10 @@ export default {
       roommate: [],
       owner: false,
       choosingRole: true,
-      roles: []
+      AllChosen: false,
+      roles: [],
+      players: [],
+      myIndex: ''
     }
   },
   methods: {
@@ -91,7 +145,26 @@ export default {
               for (const e in data) {
                 if (e === _self.myId) { _self.roles = JSON.parse(data[e]) }
               }
-              console.log(_self.roles)
+              break
+            case 'playersData':
+              _self.players = JSON.parse(data.data)
+              for (const e in _self.players) {
+                if (_self.players[e].id + '' === _self.myId) { _self.myIndex = e }
+              }
+              console.log(typeof (_self.myIndex))
+              break
+            case 'AllChosen':
+              _self.$message.success('游戏开始')
+              _self.AllChosen = true
+              break
+            case 'turnStartStage':
+              _self.$message(_self.selectPlayerById(data.id).role.name + '开始ta的回合')
+              if (data.id === _self.myId) {
+                _self.socket.send(JSON.stringify({
+                  type: 'drawCardStage',
+                  id: parseInt(_self.myId)
+                }))
+              }
               break
             default:
               break
@@ -109,6 +182,22 @@ export default {
       this.socket.send(JSON.stringify({
         type: 'gameStart'
       }))
+    },
+    chooseRole: function (index) {
+      this.choosingRole = false
+      this.socket.send(JSON.stringify({
+        type: 'chooseRole',
+        id: this.myId,
+        name: this.roles[index].name
+      }))
+    },
+    selectPlayerById: function (id) {
+      for (const e in this.players) {
+        if (this.players[e].id + '' === id) {
+          return this.players[e]
+        }
+      }
+      return null
     }
   },
   mounted () {
@@ -131,7 +220,7 @@ export default {
 }
 .gametable {
     border: solid 1px blue;
-    flex: 4;
+    flex: 5;
 }
 .chooseRoleArea {
     width: 600px;
@@ -166,6 +255,61 @@ export default {
     display: flex;
     padding: 0;
 }
+.playerMessage-2players {
+    height: 220px;
+    width: 180px;
+    border: 1px solid black;
+    border-radius: 5px;
+    margin: 20px auto auto 600px;
+}
+.playerMessage-header {
+    display: flex;
+}
+.playerMessage-header-left {
+    margin: 10px auto auto 10px;
+}
+.playerMessage-header-right {
+    margin: 10px 10px auto auto;
+    color: #FF2D2D;
+}
+.playerMessage-role {
+    line-height: 140px;
+    text-align: center;
+    font-size: 26px;
+    font-family: "Microsoft Yahei", sans-serif;
+    letter-spacing: 0.032cm;
+}
+.playerMessage-morePlayers-top {
+    width: 1000px;
+    height: 240px;
+    display: flex;
+}
+.playerMessage {
+    margin: 10px auto;
+    height: 220px;
+    width: 180px;
+    border: 1px solid black;
+    border-radius: 5px;
+}
+.playerMessage-morePlayers-mid {
+    width: 100%;
+    height: 240px;
+    display: flex;
+}
+.playerMessage-morePlayers-mid-left {
+    margin: 10px auto auto 40px;
+    height: 220px;
+    width: 180px;
+    border: 1px solid black;
+    border-radius: 5px;
+}
+.playerMessage-morePlayers-mid-right {
+    margin: 10px 40px auto auto;
+    height: 220px;
+    width: 180px;
+    border: 1px solid black;
+    border-radius: 5px;
+}
 .aside {
     border: solid 1px blue;
     flex: 1;
@@ -180,11 +324,45 @@ export default {
 }
 .cardArea {
     border: solid 1px yellow;
-    flex: 3;
+    flex: 4;
+    display: flex;
+}
+.card {
+  width: 130px;
+  height: 180px;
+  margin: auto 5px;
+  border: 1px solid black;
+  border-radius: 10px;
+  text-align: center;
+  line-height: 180px;
+  font-size: 26px;
+    font-family: "Microsoft Yahei", sans-serif;
+    letter-spacing: 0.032cm;
+
+}
+.card:hover {
+  margin: -20px 5px 40px;
 }
 .roleArea {
     border: solid 1px yellow;
     flex: 1;
+}
+.roleArea-header {
+    display: flex;
+}
+.roleArea-header-left {
+    margin: 10px auto auto 10px;
+}
+.roleArea-header-right {
+    margin: 10px 10px auto auto;
+    color: #FF2D2D;
+}
+.roleArea-footer {
+    line-height: 160px;
+    text-align: center;
+    font-size: 26px;
+    font-family: "Microsoft Yahei", sans-serif;
+    letter-spacing: 0.032cm;
 }
 .waitingRoomArea {
     width: 1280px;
