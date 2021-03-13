@@ -37,7 +37,7 @@ public class GameSocket {
 
     }
 
-    public void turnStartStage (int id) {
+    public void turnStartStage (int id) throws IOException {
         Player player=game.selectPlayerById(id);
         if(game.getPlayers().indexOf(player)==0) {
             game.setYear(game.getYear()+1);
@@ -51,11 +51,21 @@ public class GameSocket {
             //大学毕业，游戏结算
         }else {
             //向前端询问这个人物是否有主动技能
+             Map<String,String> map1=new HashMap<>();
+            map1.put("type","turnStartStage");
+            map1.put("id",id+"");
+            JSONObject jsonObject=JSONObject.fromObject(map1);
+            sendMessage(jsonObject.toString());
         }
     }
 
-    public void sendAllPlayerMessage () {
+    public void sendAllPlayerMessage () throws IOException {
         //向前端发送更新后的游戏信息
+        Map<String,String> map=new HashMap<>();
+        map.put("type","playersData");
+        map.put("data",JSONArray.fromObject(game.getPlayers()).toString());
+        JSONObject jsonObject=JSONObject.fromObject(map);
+        sendMessage(jsonObject.toString());
     }
 
     public void drawCard (Player player) {
@@ -68,7 +78,7 @@ public class GameSocket {
         //发送弃牌信息
     }
 
-    public void drawCardStage (int id) {
+    public void drawCardStage (int id) throws IOException {
         Player player=game.selectPlayerById(id);
         int drawCardTimes=5;
         if(haveThisSkill(player,"容光焕发"))
@@ -80,6 +90,7 @@ public class GameSocket {
             drawCardTimes++;
         for (int i=0;i<drawCardTimes;i++)
             drawCard(player);
+        sendAllPlayerMessage();
     }
 
     public void disCardStage (int id) {
@@ -87,7 +98,7 @@ public class GameSocket {
         disCard(player);
     }
 
-    public void studyCard (int  id1,int  id2,String name,int level) {
+    public void studyCard (int  id1,int  id2,String name,int level) throws IOException {
         boolean isSuccess=game.studyCard(game.selectPlayerById(id1),game.selectPlayerById(id2),name,level);
         if (isSuccess){
             //发送成功信息
@@ -124,7 +135,7 @@ public class GameSocket {
         }
     }
 
-    public void trickCard (int id1,int id2,String name) {
+    public void trickCard (int id1,int id2,String name) throws IOException {
         Player player1=game.selectPlayerById(id1);
         Player player2=game.selectPlayerById(id2);
         //
@@ -216,22 +227,31 @@ public class GameSocket {
                         map.put("data", JSONArray.fromObject(roommates).toString());
                         JSONObject jsonObject1=JSONObject.fromObject(map);
                         sendMessage(jsonObject1.toString());break;
-            case "gameStart": game.gameInit(roommates.size(),roommates);
+            case "gameStart": Collections.shuffle(roommates);
+                    game.gameInit(roommates.size(),roommates);
                     Map<String,String> map1=new HashMap<>();
                     map1.put("type","gameStart");
                     JSONObject jsonObject2=JSONObject.fromObject(map1);
                     sendMessage(jsonObject2.toString());
                     jsonObject2=JSONObject.fromObject(game.gameChooseRole());
                     sendMessage(jsonObject2.toString());break;
-            case "chooseRole":boolean AllChosen=game.chooseRole(0,null);
-                if (AllChosen) turnStartStage(game.getPlayers().get(0).getId());break;
-            case "turnStartStage": turnStartStage(0);break;
-            case "drawCardsStage": drawCardStage(0);break;
+            case "chooseRole":boolean AllChosen=game.chooseRole(jsonObject.getInt("id"),jsonObject.getString("name"));
+                if (AllChosen) {
+                    sendAllPlayerMessage();
+                    map1=new HashMap<>();
+                    map1.put("type","AllChosen");
+                    jsonObject2=JSONObject.fromObject(map1);
+                    sendMessage(jsonObject2.toString());
+                    turnStartStage(game.getPlayers().get(0).getId());
+                }break;
+            case "turnStartStage": turnStartStage(jsonObject.getInt("id"));break;
+            case "drawCardStage": drawCardStage(jsonObject.getInt("id"));break;
             case "disCardStage": disCardStage(0);break;
             case "学习牌":studyCard(0,0,"项目直接的名字",0);break;
             case "计策牌":trickCard(0,0,"卡牌的名字");break;
             case "机缘牌":luckyCard(0,"卡牌的名字");break;
             case "turnOverStage":turnOverStage(0);break;
+            default:sendMessage(message);break;
         }
     }
 
@@ -252,6 +272,7 @@ public class GameSocket {
         }
         if (isOwner&&roommates.size()>0)
             roommates.get(0).setOwner(true);
+        game=new Game();
     }
 
     @OnError

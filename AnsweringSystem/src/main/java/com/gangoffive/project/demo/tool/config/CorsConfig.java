@@ -17,6 +17,8 @@ public class CorsConfig {
         corsConfiguration.addAllowedOrigin("https://localhost:8081"); // 允许任何域名使用
         corsConfiguration.addAllowedOrigin("https://39.108.237.209:8081"); // 允许任何域名使用
         corsConfiguration.addAllowedOrigin("https://www.lanwenjun.ltd:8081"); // 允许任何域名使用
+        corsConfiguration.addAllowedOrigin("http://192.168.0.106"); // 允许任何域名使用
+        corsConfiguration.addAllowedOrigin("http://192.168.0.105"); // 允许任何域名使用
 
         corsConfiguration.addAllowedMethod("*"); // 允许任何的请求方法
         corsConfiguration.setAllowCredentials(true);
