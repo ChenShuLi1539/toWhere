@@ -12,7 +12,7 @@
                     </div>
                 </div>
             </div>
-            <div class="playerMessage-2players" v-if="players.length===2">
+            <div class="playerMessage-2players" v-if="players.length===2" tabindex="0" @click="chooseThisPlayer((parseInt(myIndex)+1)%players.length)">
                 <div class="playerMessage-header">
                     <div class="playerMessage-header-left">{{players[(parseInt(myIndex)+1)%players.length].name}}</div>
                     <div class="playerMessage-header-right">❤×{{players[(parseInt(myIndex)+1)%players.length].mood}}</div>
@@ -22,7 +22,7 @@
             </div>
 
             <div  class="playerMessage-morePlayers-top" v-if="players.length>2">
-              <div class="playerMessage" v-for="(each,index) in players" v-bind:key="index" >
+              <div class="playerMessage" v-for="(each,index) in players" v-bind:key="index" tabindex="0"  @click="chooseThisPlayer(index)">
                 <div v-if="index!==myIndex&&index!==parseInt(myIndex+1)%players.length&&index!==parseInt(myIndex-1)%players.length">
                   <div class="playerMessage-header">
                     <div class="playerMessage-header-left">{{players[index].name}}</div>
@@ -35,7 +35,7 @@
             </div>
 
             <div class="playerMessage-morePlayers-mid" v-if="players.length>2">
-              <div class="playerMessage-morePlayers-mid-left">
+              <div class="playerMessage-morePlayers-mid-left" tabindex="0"  @click="chooseThisPlayer((parseInt(myIndex)+1))%players.length">
                   <div class="playerMessage-header">
                     <div class="playerMessage-header-left">{{players[(parseInt(myIndex)+1)%players.length].name}}</div>
                     <div class="playerMessage-header-right">❤×{{players[(parseInt(myIndex)+1)%players.length].mood}}</div>
@@ -44,7 +44,7 @@
                   <div class="playerMessage-buff"></div>
               </div>
 
-              <div class="playerMessage-morePlayers-mid-right">
+              <div class="playerMessage-morePlayers-mid-right" tabindex="0"  @click="chooseThisPlayer((parseInt(myIndex)-1)%players.length)">
                   <div class="playerMessage-header">
                     <div class="playerMessage-header-left">{{players[(parseInt(myIndex)-1)%players.length].name}}</div>
                     <div class="playerMessage-header-right">❤×{{players[(parseInt(myIndex)-1)%players.length].mood}}</div>
@@ -53,13 +53,31 @@
                   <div class="playerMessage-buff"></div>
               </div>
             </div>
+
+            <div class="selectProjectArea" v-show="selectedStudyCard">
+                <div class="willBeChosenProject" v-for="(each,index) in selectedProject" v-bind:key="index" @click="chooseThisProject(index)">
+                    {{each}}
+                </div>
+            </div>
+
+            <div class="selectLevelArea" v-show="selectedStudyCard">
+                <div class="willBeChosenLevel" v-for="(each,index) in levels" v-bind:key="index" @click="chooseThisLevel(index)">
+                    {{each}}
+                </div>
+            </div>
+
+            <div class="buttonArea">
+                <el-button type="primary" round class="useCardButton-true" v-if="selectedCard" @click="useCard()">使用</el-button>
+                <el-button type="danger" round class="useCardButton-false" v-if="selectedCard" @click="clearUseButton()">取消</el-button>
+            </div>
+            <el-button type="primary" round class="turnoverButton" v-if="isturnStart" @click="turnOver()">回合结束</el-button>
         </div>
         <div class="aside"></div>
     </el-main>
     <el-footer height='200px' class="footer">
         <div class="buffArea"></div>
         <div class="cardArea" v-if="AllChosen">
-          <div class="card" v-for="(each,index) in players[myIndex].cards" v-bind:key="index">
+          <div class="card" v-for="(each,index) in players[myIndex].cards" v-bind:key="index" tabindex="0" @click="choosingCard(index)">
             {{each.name}}
           </div>
         </div>
@@ -99,9 +117,20 @@ export default {
       owner: false,
       choosingRole: true,
       AllChosen: false,
+      isturnStart: false,
       roles: [],
       players: [],
-      myIndex: ''
+      myIndex: '',
+
+      // 以下数值是出牌时的参数
+      chosenCard: -1,
+      selectedProject: [],
+      levels: ['F', 'E', 'D', 'C', 'B', 'A'],
+      selectedCard: false,
+      selectedStudyCard: false,
+      chosenPlayerId: 0,
+      chosenLevel: -1,
+      chosenProject: ''
     }
   },
   methods: {
@@ -159,12 +188,37 @@ export default {
               break
             case 'turnStartStage':
               _self.$message(_self.selectPlayerById(data.id).role.name + '开始ta的回合')
+              if (data.id + '' === _self.myId + '') _self.isturnStart = true
               if (data.id === _self.myId) {
                 _self.socket.send(JSON.stringify({
                   type: 'drawCardStage',
                   id: parseInt(_self.myId)
                 }))
               }
+              break
+            case 'disCardStage':
+              if (data.id === _self.myId) {
+                _self.socket.send(JSON.stringify({
+                  type: 'turnOverStage',
+                  id: parseInt(_self.myId)
+                }))
+              }
+
+              break
+            case 'turnOverStage':
+              if (data.id === _self.myId) {
+                _self.socket.send(JSON.stringify({
+                  type: 'turnStartStage',
+                  id: _self.players[(parseInt(_self.myIndex) + 1) % _self.players.length].id
+                }))
+              }
+
+              break
+            case 'studySuccess':
+              _self.$message.success(data.text)
+              break
+            case 'studyFail':
+              _self.$message.error(data.text)
               break
             default:
               break
@@ -193,11 +247,239 @@ export default {
     },
     selectPlayerById: function (id) {
       for (const e in this.players) {
-        if (this.players[e].id + '' === id) {
+        if (this.players[e].id + '' === id + '') {
           return this.players[e]
         }
       }
       return null
+    },
+    chooseThisProject: function (index) {
+      this.chosenProject = this.selectedProject[index]
+    },
+    chooseThisLevel: function (index) {
+      this.chosenLevel = index
+      let canUse = false
+      switch (index) {
+        case 0:
+          if (this.players[this.myIndex].mood > 0.5) {
+            canUse = true
+          }
+          break
+        case 1:
+          if (this.players[this.myIndex].mood > 1.5) {
+            canUse = true
+          }
+          break
+        case 2:
+          if (this.players[this.myIndex].mood > 2.7) {
+            canUse = true
+          }
+          break
+        case 3:
+          if (this.players[this.myIndex].mood > 3.5) {
+            canUse = true
+          }
+          break
+        case 4:
+          if (this.players[this.myIndex].mood > 4.4) {
+            canUse = true
+          }
+          break
+        case 5:
+          if (this.players[this.myIndex].mood > 5.3) {
+            canUse = true
+          }
+          break
+        default:
+          break
+      }
+      if (!canUse) {
+        this.chosenLevel = -1
+        this.$message.error('你当前的心情值不足以学习此等级')
+      }
+    },
+    chooseThisPlayer: function (index) {
+      console.log(index)
+      this.chosenPlayerId = this.players[index].id
+    },
+    choosingCard: function (index) {
+      let canUse = true
+      this.chosenCard = index
+      this.selectedCard = false
+      this.selectedStudyCard = false
+      this.chosenProject = ''
+      switch (this.players[this.myIndex].cards[index].name) {
+        case '恶作剧':
+          if (this.players[this.myIndex].role.natures[2].level < 5) { canUse = false }
+          break
+        case '整蛊':
+          if (this.players[this.myIndex].role.natures[2].level < 8) { canUse = false }
+          break
+        case '振奋':
+          if (this.players[this.myIndex].role.natures[1].level < 2) { canUse = false }
+          break
+        case '共渡难关':
+          if (this.players[this.myIndex].role.natures[1].level < 7) { canUse = false }
+          break
+        case '灵感':
+          if (this.players[this.myIndex].role.natures[0].level < 5) { canUse = false }
+          break
+        case '无独有偶':
+          if (this.players[this.myIndex].role.natures[0].level < 7) { canUse = false }
+          break
+        case '底力爆发':
+          if (this.players[this.myIndex].role.natures[4].level < 3) { canUse = false }
+          break
+        case '柳暗花明':
+          if (this.players[this.myIndex].role.natures[4].level < 9) { canUse = false }
+          break
+        case '深呼吸':
+          if (this.players[this.myIndex].role.natures[3].level < 6) { canUse = false }
+          break
+        case '赠人玫瑰':
+          if (this.players[this.myIndex].role.natures[3].level < 8) { canUse = false }
+          break
+        case '留一手':
+          if (this.players[this.myIndex].role.natures[5].level < 4) { canUse = false }
+          break
+        case '潜心修学':
+          if (this.players[this.myIndex].role.natures[5].level < 9) { canUse = false }
+          break
+        default:
+          break
+      }
+      if (canUse) {
+        this.selectedCard = true
+        if (this.players[this.myIndex].cards[index].type === 0) {
+          this.selectedStudyCard = true
+          switch (this.players[this.myIndex].cards[index].name) {
+            case '学习体育':
+              this.selectedProject = ['球类', '田径', '水上项目', '武术']
+              break
+            case '学习音乐':
+              this.selectedProject = ['乐器', '声乐']
+              break
+            case '学习文学':
+              this.selectedProject = ['小说', '散文', '报道']
+              break
+            case '学习美术':
+              this.selectedProject = ['绘画', '服饰', '建筑']
+              break
+            case '学习自然':
+              this.selectedProject = ['动物培育', '园艺', '天文', '地理']
+              break
+            case '学习生活':
+              this.selectedProject = ['八卦', '手工', '厨艺', '游戏']
+              break
+            default:
+              break
+          }
+        }
+      } else {
+        this.$message.error('你未达到这张牌的使用条件')
+      }
+    },
+    clearUseButton: function () {
+      this.selectedCard = false
+      this.selectedStudyCard = false
+    },
+    useCard: function () {
+      let canUse = true
+      if (this.chosenCard < 0) {
+        canUse = false
+        this.$message.error('选择卡牌时出错')
+      }
+
+      if (this.players[this.myIndex].cards[this.chosenCard].type === 0) {
+        if (this.chosenPlayerId === 0) {
+          canUse = false
+          this.$message.error('未选择正确的使用玩家')
+        }
+        if (this.chosenProject === '') {
+          canUse = false
+          this.$message.error('未选择正确的项目')
+        }
+        switch (this.chosenLevel) {
+          case 0:
+            if (this.selectPlayerById(this.chosenPlayerId).mood < 0.1) {
+              canUse = false
+              this.$message.error('对方当前的心情值不足以学习此等级')
+            }
+            break
+          case 1:
+            if (this.selectPlayerById(this.chosenPlayerId).mood < 0.6) {
+              canUse = false
+              this.$message.error('对方当前的心情值不足以学习此等级')
+            }
+            break
+          case 2:
+            if (this.selectPlayerById(this.chosenPlayerId).mood < 1.1) {
+              canUse = false
+              this.$message.error('对方当前的心情值不足以学习此等级')
+            }
+            break
+          case 3:
+            if (this.selectPlayerById(this.chosenPlayerId).mood < 2.1) {
+              canUse = false
+              this.$message.error('对方当前的心情值不足以学习此等级')
+            }
+            break
+          case 4:
+            if (this.selectPlayerById(this.chosenPlayerId).mood < 3.1) {
+              canUse = false
+              this.$message.error('对方当前的心情值不足以学习此等级')
+            }
+            break
+          case 5:
+            if (this.selectPlayerById(this.chosenPlayerId).mood < 4.1) {
+              canUse = false
+              this.$message.error('对方当前的心情值不足以学习此等级')
+            }
+            break
+          default:
+            canUse = false
+            this.$message.error('未选择等级')
+            break
+        }
+      }
+      if (this.players[this.myIndex].cards[this.chosenCard].type === 3) {
+        if (this.chosenPlayerId === 0) {
+          canUse = false
+          this.$message.error('未选择正确的使用玩家')
+        }
+      }
+      if (canUse) {
+        switch (this.players[this.myIndex].cards[this.chosenCard].type) {
+          case 0:
+            this.socket.send(JSON.stringify({
+              type: '学习牌',
+              id: this.myId,
+              id2: this.chosenPlayerId,
+              cardName: (this.players[this.myIndex].cards[this.chosenCard].name),
+              name: this.chosenProject,
+              level: this.chosenLevel
+            }))
+            break
+          case 4:
+            this.socket.send(JSON.stringify({
+              type: '机缘牌',
+              id: this.myId,
+              name: (this.players[this.myIndex].cards[this.chosenCard].name)
+            }))
+            break
+          default:
+            break
+        }
+        this.clearUseButton()
+      }
+    },
+    turnOver: function () {
+      this.isturnStart = false
+      this.clearUseButton()
+      this.socket.send(JSON.stringify({
+        type: 'disCardStage',
+        id: parseInt(this.myId)
+      }))
     }
   },
   mounted () {
@@ -256,11 +538,11 @@ export default {
     padding: 0;
 }
 .playerMessage-2players {
-    height: 220px;
-    width: 180px;
+    height: 180px;
+    width: 140px;
     border: 1px solid black;
     border-radius: 5px;
-    margin: 20px auto auto 600px;
+    margin: 20px auto 180px 600px;
 }
 .playerMessage-header {
     display: flex;
@@ -273,7 +555,7 @@ export default {
     color: #FF2D2D;
 }
 .playerMessage-role {
-    line-height: 140px;
+    line-height: 100px;
     text-align: center;
     font-size: 26px;
     font-family: "Microsoft Yahei", sans-serif;
@@ -286,8 +568,8 @@ export default {
 }
 .playerMessage {
     margin: 10px auto;
-    height: 220px;
-    width: 180px;
+    height: 180px;
+    width: 140px;
     border: 1px solid black;
     border-radius: 5px;
 }
@@ -298,17 +580,63 @@ export default {
 }
 .playerMessage-morePlayers-mid-left {
     margin: 10px auto auto 40px;
-    height: 220px;
-    width: 180px;
+    height: 180px;
+    width: 140px;
     border: 1px solid black;
     border-radius: 5px;
 }
 .playerMessage-morePlayers-mid-right {
     margin: 10px 40px auto auto;
-    height: 220px;
-    width: 180px;
+    height: 180px;
+    width: 140px;
     border: 1px solid black;
     border-radius: 5px;
+}
+.selectProjectArea {
+    height: 20px;
+    width: 600px;
+    display: flex;
+    margin: 0 auto 0 300px;
+    border: 1px solid black;
+}
+.willBeChosenProject {
+   height: 100%;
+   text-align: center;
+   margin: auto;
+}
+.willBeChosenProject:hover {
+   border: 1px solid black;
+}
+.selectLevelArea {
+    height: 20px;
+    width: 600px;
+    display: flex;
+    margin: 10px auto 0 300px;
+    border: 1px solid black;
+}
+.willBeChosenLevel {
+   height: 100%;
+   text-align: center;
+   margin: auto;
+}
+.willBeChosenLevel:hover {
+   border: 1px solid black;
+}
+.buttonArea {
+  width: 600px;
+  margin: 10px auto 0 300px;
+  display: flex;
+}
+.useCardButton-true {
+  margin: auto auto auto 20px;
+}
+.useCardButton-false {
+  margin: auto 20px auto auto;
+}
+.turnoverButton {
+  position: absolute;
+  top: 480px;
+  left: 1050px;
 }
 .aside {
     border: solid 1px blue;
@@ -338,9 +666,14 @@ export default {
   font-size: 26px;
     font-family: "Microsoft Yahei", sans-serif;
     letter-spacing: 0.032cm;
+    background-color: white;
 
 }
 .card:hover {
+  margin: -20px 5px 40px;
+}
+.card:focus {
+  border: 4px solid #46A3FF;
   margin: -20px 5px 40px;
 }
 .roleArea {
