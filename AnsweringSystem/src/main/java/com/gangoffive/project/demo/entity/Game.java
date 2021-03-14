@@ -341,14 +341,10 @@ public class Game {
     }
 
     public boolean studyCard (Player player1,Player player2,String name,int level) {
-        //
-        //先把牌删除
-        //
-        player1.setUsedCardsNum(player1.getUsedCardsNum()+1);
         switch (level) {
             //0~5表示F~A
             case 0:
-                player1.setMood(player1.getMood()-0.5);
+                player1.setMood(mathRound(player1.getMood()-0.5));
                 if(caculateMatery(player1,name)+caculateMatery(player2,name)>=0) {
                     studySuccess(player1,name,level);
                     studySuccess(player2,name,level);
@@ -359,8 +355,8 @@ public class Game {
                     return false;
                 }
             case 1:
-                player1.setMood(player1.getMood()-1.5);
-                player2.setMood(player2.getMood()-0.5);
+                player1.setMood(mathRound(player1.getMood()-1.5));
+                player2.setMood(mathRound(player2.getMood()-0.5));
                 if(caculateMatery(player1,name)+caculateMatery(player2,name)>=10) {
                     studySuccess(player1,name,level);
                     studySuccess(player2,name,level);
@@ -371,8 +367,8 @@ public class Game {
                     return false;
                 }
             case 2:
-                player1.setMood(player1.getMood()-2.7);
-                player2.setMood(player2.getMood()-1.0);
+                player1.setMood(mathRound(player1.getMood()-2.7));
+                player2.setMood(mathRound(player2.getMood()-1.0));
                 if(caculateMatery(player1,name)+caculateMatery(player2,name)>=30) {
                     studySuccess(player1,name,level);
                     studySuccess(player2,name,level);
@@ -383,8 +379,8 @@ public class Game {
                     return false;
                 }
             case 3:
-                player1.setMood(player1.getMood()-3.5);
-                player2.setMood(player2.getMood()-2.0);
+                player1.setMood(mathRound(player1.getMood()-3.5));
+                player2.setMood(mathRound(player2.getMood()-2.0));
                 if(caculateMatery(player1,name)+caculateMatery(player2,name)>=55) {
                     studySuccess(player1,name,level);
                     studySuccess(player2,name,level);
@@ -395,8 +391,8 @@ public class Game {
                     return false;
                 }
             case 4:
-                player1.setMood(player1.getMood()-4.4);
-                player2.setMood(player2.getMood()-3.0);
+                player1.setMood(mathRound(player1.getMood()-4.4));
+                player2.setMood(mathRound(player2.getMood()-3.0));
                 if(caculateMatery(player1,name)+caculateMatery(player2,name)>=75) {
                     studySuccess(player1,name,level);
                     studySuccess(player2,name,level);
@@ -407,8 +403,8 @@ public class Game {
                     return false;
                 }
             case 5:
-                player1.setMood(player1.getMood()-5.3);
-                player2.setMood(player2.getMood()-4.0);
+                player1.setMood(mathRound(player1.getMood()-5.3));
+                player2.setMood(mathRound(player2.getMood()-4.0));
                 if(caculateMatery(player1,name)+caculateMatery(player2,name)>=90) {
                     studySuccess(player1,name,level);
                     studySuccess(player2,name,level);

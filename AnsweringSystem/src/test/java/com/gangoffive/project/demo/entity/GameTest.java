@@ -25,26 +25,26 @@ class GameTest {
 //        System.out.println(players.get(1).getBigProjects());
 
 
-//        List<String> list = new ArrayList<>();
-//        list.add("male");
-//        list.add("female");
-//        list.add("female");
-//        list.add("male");
-//
-//        //遍历删除,除去男生
-//        Iterator<String> iterator = list.iterator();
-//        while (iterator.hasNext()) {
-//            String a = iterator.next();
-//            if ("male".equals(a)) {
-//                iterator.remove();//使用迭代器的删除方法删除
-//            }
-//        }
-//        System.out.println(list);
-        Player player=new Player("?",1);
-        Player temp=player;
-        temp.setName("123");
-        System.out.println(temp);
-        System.out.println(player);
+        List<String> list = new ArrayList<>();
+        list.add("male");
+        list.add("female");
+        list.add("female");
+        list.add("male");
+
+        //遍历删除,除去男生
+        Iterator<String> iterator = list.iterator();
+        while (iterator.hasNext()) {
+            String a = iterator.next();
+            if ("female".equals(a)) {
+                iterator.remove();//使用迭代器的删除方法删除
+            }
+        }
+        System.out.println(list);
+//        Player player=new Player("?",1);
+//        Player temp=player;
+//        temp.setName("123");
+//        System.out.println(temp);
+//        System.out.println(player);
     }
 
     @Test

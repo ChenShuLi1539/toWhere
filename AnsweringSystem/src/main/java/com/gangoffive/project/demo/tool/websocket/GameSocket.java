@@ -93,17 +93,46 @@ public class GameSocket {
         sendAllPlayerMessage();
     }
 
-    public void disCardStage (int id) {
+    public void disCardStage (int id) throws IOException {
         Player player=game.selectPlayerById(id);
         disCard(player);
+        sendAllPlayerMessage();
+        Map<String,String> map1=new HashMap<>();
+        map1.put("type","turnOverStage");
+        map1.put("id",id+"");
+        JSONObject jsonObject=JSONObject.fromObject(map1);
+        sendMessage(jsonObject.toString());
     }
 
-    public void studyCard (int  id1,int  id2,String name,int level) throws IOException {
+    public void useCard (int id,String name) {
+        Player player=game.selectPlayerById(id);
+        Iterator<Card> iterator = player.getCards().iterator();
+        while (iterator.hasNext()) {
+            Card a = iterator.next();
+            if (a.getName().equals(name) ) {
+                game.getUsedCards().add(a);
+                iterator.remove();
+                break;
+            }
+        }
+        player.setUsedCardsNum(player.getUsedCardsNum()+1);
+    }
+
+    public void studyCard (int  id1,int  id2,String cardName,String name,int level) throws IOException {
+        useCard(id1,cardName);
         boolean isSuccess=game.studyCard(game.selectPlayerById(id1),game.selectPlayerById(id2),name,level);
         if (isSuccess){
-            //发送成功信息
+            Map<String,String> map=new HashMap<>();
+            map.put("type","studySuccess");
+            map.put("text",game.selectPlayerById(id1).getRole().getName()+"与"+game.selectPlayerById(id2).getRole().getName()+"学习"+name+"成功");
+            JSONObject jsonObject=JSONObject.fromObject(map);
+            sendMessage(jsonObject.toString());
         } else {
-            //发送失败信息
+            Map<String,String> map=new HashMap<>();
+            map.put("type","studyFail");
+            map.put("text",game.selectPlayerById(id1).getRole().getName()+"与"+game.selectPlayerById(id2).getRole().getName()+"学习"+name+"失败");
+            JSONObject jsonObject=JSONObject.fromObject(map);
+            sendMessage(jsonObject.toString());
         }
         sendAllPlayerMessage();
     }
@@ -140,6 +169,7 @@ public class GameSocket {
         Player player2=game.selectPlayerById(id2);
         //
         //先把牌删除
+        useCard(id1,name);
         //
         player1.setUsedCardsNum(player1.getUsedCardsNum()+1);
         switch (name) {
@@ -166,8 +196,9 @@ public class GameSocket {
         sendAllPlayerMessage();
     }
 
-    public void luckyCard (int id,String name) {
+    public void luckyCard (int id,String name) throws IOException {
         Player player=game.selectPlayerById(id);
+        useCard(id,name);
         switch (name) {
             case "提升聪颖":player.getRole().getNatures().get(0).setLevel(player.getRole().getNatures().get(0).getLevel()+1);break;
             case "提升勇敢":player.getRole().getNatures().get(1).setLevel(player.getRole().getNatures().get(1).getLevel()+1);break;
@@ -190,9 +221,10 @@ public class GameSocket {
                     }
                 }break;
         }
+        sendAllPlayerMessage();
     }
 
-    public void turnOverStage (int id) {
+    public void turnOverStage (int id) throws IOException {
         Player player=game.selectPlayerById(id);
         for (Buff e:player.getBuffs()) {
             e.setLastTurns(e.getLastTurns()-1);
@@ -204,6 +236,12 @@ public class GameSocket {
                 iterator.remove();//使用迭代器的删除方法删除
             }
         }
+        sendAllPlayerMessage();
+        Map<String,String> map1=new HashMap<>();
+        map1.put("type","turnOverStage");
+        map1.put("id",id+"");
+        JSONObject jsonObject=JSONObject.fromObject(map1);
+        sendMessage(jsonObject.toString());
     }
 
     @OnOpen
@@ -246,11 +284,11 @@ public class GameSocket {
                 }break;
             case "turnStartStage": turnStartStage(jsonObject.getInt("id"));break;
             case "drawCardStage": drawCardStage(jsonObject.getInt("id"));break;
-            case "disCardStage": disCardStage(0);break;
-            case "学习牌":studyCard(0,0,"项目直接的名字",0);break;
-            case "计策牌":trickCard(0,0,"卡牌的名字");break;
-            case "机缘牌":luckyCard(0,"卡牌的名字");break;
-            case "turnOverStage":turnOverStage(0);break;
+            case "disCardStage": disCardStage(jsonObject.getInt("id"));break;
+            case "学习牌":studyCard(jsonObject.getInt("id"),jsonObject.getInt("id2"),jsonObject.getString("cardName"),jsonObject.getString("name"),jsonObject.getInt("level"));break;
+            case "计策牌":trickCard(jsonObject.getInt("id"),jsonObject.getInt("id2"),jsonObject.getString("name"));break;
+            case "机缘牌":luckyCard(jsonObject.getInt("id"),jsonObject.getString("name"));break;
+            case "turnOverStage":turnOverStage(jsonObject.getInt("id"));break;
             default:sendMessage(message);break;
         }
     }
