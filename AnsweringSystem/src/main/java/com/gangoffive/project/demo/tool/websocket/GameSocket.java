@@ -37,6 +37,56 @@ public class GameSocket {
 
     }
 
+    public void caculateTolatScore () {
+        for (Player e:game.getPlayers()) {
+            int totalScore=0;
+
+            //计算项目地熟练度分值
+            for (BigProject bigProject:e.getBigProjects()) {
+                for (SmallProject smallProject:bigProject.getSmallProjects()) {
+                    if (smallProject.getMastery()>=45) {
+                        totalScore+=10;
+                    } else if (smallProject.getMastery()>=35) {
+                        totalScore+=8;
+                    } else if (smallProject.getMastery()>=25) {
+                        totalScore+=6;
+                    } else if (smallProject.getMastery()>=17) {
+                        totalScore+=4;
+                    } else if (smallProject.getMastery()>=10) {
+                        totalScore+=2;
+                    }
+                }
+            }
+            e.setProjectScore(totalScore);
+            totalScore=0;
+
+            //心情值分值
+            totalScore+=(int)(e.getMood()*1.5);
+            e.setMoodScore(totalScore);
+            totalScore=0;
+
+            //使用牌数量分值
+            totalScore+=(int)(e.getUsedCardsNum()*0.5);
+            e.setCardScore(totalScore);
+            totalScore=0;
+
+            //名品分值
+            e.setTreasureScore(totalScore);
+            totalScore=0;
+
+            e.setTotalScore(e.getProjectScore()+e.getMoodScore()+e.getCardScore()+e.getTreasureScore());
+        }
+    }
+
+    static class SortHelper implements Comparator{
+        @Override
+        public int compare(Object a,Object b) {
+            Player s1=(Player) a;
+            Player s2=(Player) b;
+            return s2.getTotalScore() - s1.getTotalScore();
+        }
+    }
+
     public void turnStartStage (int id) throws IOException {
         Player player=game.selectPlayerById(id);
         if(game.getPlayers().indexOf(player)==0) {
@@ -49,6 +99,14 @@ public class GameSocket {
         }
         if(game.getYear()==13) {
             //大学毕业，游戏结算
+            caculateTolatScore();
+            game.getPlayers().sort(new SortHelper());
+            Map<String,String> map1=new HashMap<>();
+            map1.put("type","gameover");
+            map1.put("data",JSONArray.fromObject(game.getPlayers()).toString());
+            JSONObject jsonObject=JSONObject.fromObject(map1);
+            sendMessage(jsonObject.toString());
+            game=new Game();
         }else {
             //向前端询问这个人物是否有主动技能
              Map<String,String> map1=new HashMap<>();
