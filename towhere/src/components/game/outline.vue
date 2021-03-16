@@ -12,7 +12,7 @@
                     </div>
                 </div>
             </div>
-            <div class="playerMessage-2players" v-if="players.length===2" tabindex="0" @click="chooseThisPlayer((parseInt(myIndex)+1)%players.length)">
+            <div class="playerMessage-2players" v-if="players.length===2" @click="chooseThisPlayer((parseInt(myIndex)+1)%players.length)" v-bind:class="{haveBeenSelectedRole: chosenPlayerId === players[(parseInt(myIndex)+1)%players.length].id}">
                 <div class="playerMessage-header">
                     <div class="playerMessage-header-left">{{players[(parseInt(myIndex)+1)%players.length].name}}</div>
                     <div class="playerMessage-header-right">❤×{{players[(parseInt(myIndex)+1)%players.length].mood}}</div>
@@ -22,7 +22,7 @@
             </div>
 
             <div  class="playerMessage-morePlayers-top" v-if="players.length>2">
-              <div class="playerMessage" v-for="(each,index) in players" v-bind:key="index" tabindex="0"  @click="chooseThisPlayer(index)">
+              <div class="playerMessage" v-for="(each,index) in players" v-bind:key="index"  @click="chooseThisPlayer(index)" v-bind:class="{haveBeenSelectedRole: chosenPlayerId === players[index].id}">
                 <div v-if="index!==myIndex&&index!==parseInt(myIndex+1)%players.length&&index!==parseInt(myIndex-1)%players.length">
                   <div class="playerMessage-header">
                     <div class="playerMessage-header-left">{{players[index].name}}</div>
@@ -35,7 +35,7 @@
             </div>
 
             <div class="playerMessage-morePlayers-mid" v-if="players.length>2">
-              <div class="playerMessage-morePlayers-mid-left" tabindex="0"  @click="chooseThisPlayer((parseInt(myIndex)+1))%players.length">
+              <div class="playerMessage-morePlayers-mid-left"  @click="chooseThisPlayer((parseInt(myIndex)+1))%players.length" v-bind:class="{haveBeenSelectedRole: chosenPlayerId === players[(parseInt(myIndex)+1)%players.length].id}">
                   <div class="playerMessage-header">
                     <div class="playerMessage-header-left">{{players[(parseInt(myIndex)+1)%players.length].name}}</div>
                     <div class="playerMessage-header-right">❤×{{players[(parseInt(myIndex)+1)%players.length].mood}}</div>
@@ -44,7 +44,7 @@
                   <div class="playerMessage-buff"></div>
               </div>
 
-              <div class="playerMessage-morePlayers-mid-right" tabindex="0"  @click="chooseThisPlayer((parseInt(myIndex)-1)%players.length)">
+              <div class="playerMessage-morePlayers-mid-right"  @click="chooseThisPlayer((parseInt(myIndex)-1)%players.length)" v-bind:class="{haveBeenSelectedRole: chosenPlayerId === players[(parseInt(myIndex)-1)%players.length].id}">
                   <div class="playerMessage-header">
                     <div class="playerMessage-header-left">{{players[(parseInt(myIndex)-1)%players.length].name}}</div>
                     <div class="playerMessage-header-right">❤×{{players[(parseInt(myIndex)-1)%players.length].mood}}</div>
@@ -55,13 +55,13 @@
             </div>
 
             <div class="selectProjectArea" v-show="selectedStudyCard">
-                <div class="willBeChosenProject" v-for="(each,index) in selectedProject" v-bind:key="index" @click="chooseThisProject(index)">
+                <div class="willBeChosenProject" v-for="(each,index) in selectedProject" v-bind:key="index" v-bind:class="{haveBeenSelected: selectedProject[index] === chosenProject}" @click="chooseThisProject(index)">
                     {{each}}
                 </div>
             </div>
 
             <div class="selectLevelArea" v-show="selectedStudyCard">
-                <div class="willBeChosenLevel" v-for="(each,index) in levels" v-bind:key="index" @click="chooseThisLevel(index)">
+                <div class="willBeChosenLevel" v-for="(each,index) in levels" v-bind:key="index" v-bind:class="{haveBeenSelected: index === chosenLevel}" @click="chooseThisLevel(index)">
                     {{each}}
                 </div>
             </div>
@@ -77,16 +77,16 @@
     <el-footer height='200px' class="footer">
         <div class="buffArea"></div>
         <div class="cardArea" v-if="AllChosen">
-          <div class="card" v-for="(each,index) in players[myIndex].cards" v-bind:key="index" tabindex="0" @click="choosingCard(index)">
+          <div class="card" v-for="(each,index) in players[myIndex].cards" v-bind:key="index" tabindex="0" @click="choosingCard(index)" :title="players[myIndex].cards[index].description">
             {{each.name}}
           </div>
         </div>
-        <div class="roleArea">
+        <div class="roleArea"  v-if="AllChosen" @click="chooseThisPlayer(myIndex)" v-bind:class="{haveBeenSelectedRole: chosenPlayerId === players[myIndex].id}">
           <div class="roleArea-header">
-            <div class="roleArea-header-left" v-if="AllChosen">{{players[myIndex].name}}</div>
-            <div class="roleArea-header-right" v-if="AllChosen">❤×{{this.players[this.myIndex].mood}}</div>
+            <div class="roleArea-header-left">{{players[myIndex].name}}</div>
+            <div class="roleArea-header-right">❤×{{this.players[this.myIndex].mood}}</div>
           </div>
-          <div class="roleArea-footer" v-if="AllChosen">{{this.players[this.myIndex].role.name}}</div>
+          <div class="roleArea-footer">{{this.players[this.myIndex].role.name}}</div>
         </div>
     </el-footer>
     </el-container>
@@ -100,6 +100,42 @@
             </div>
         </div>
         <el-button  type="primary" round v-show="this.owner&&this.roommate.length>1" class="gameStartButton" @click="gameStart()">开始游戏</el-button>
+    </div>
+
+    <div class="gameoverBackground" v-if="isGameover">
+      <el-table
+      :data="finalData"
+      style="width: 60%;
+            margin: 50px auto">
+        <el-table-column
+          prop="role.name"
+          label="角色"
+          width="180">
+        </el-table-column>
+        <el-table-column
+          prop="projectScore"
+          label="学习项目分数"
+          width="180">
+        </el-table-column>
+        <el-table-column
+          prop="moodScore"
+          label="心情值分数"
+          width="180">
+        </el-table-column>
+        <el-table-column
+          prop="cardScore"
+          label="使用牌分数">
+        </el-table-column>
+        <el-table-column
+          prop="treasureScore"
+          label="名品分数">
+        </el-table-column>
+        <el-table-column
+          prop="totalScore"
+          label="总分">
+        </el-table-column>
+      </el-table>
+       <el-button type="primary" round class="restartButton" @click="restart()">再来一局</el-button>
     </div>
 </div>
 
@@ -130,7 +166,10 @@ export default {
       selectedStudyCard: false,
       chosenPlayerId: 0,
       chosenLevel: -1,
-      chosenProject: ''
+      chosenProject: '',
+
+      isGameover: false,
+      finalData: []
     }
   },
   methods: {
@@ -180,7 +219,6 @@ export default {
               for (const e in _self.players) {
                 if (_self.players[e].id + '' === _self.myId) { _self.myIndex = e }
               }
-              console.log(typeof (_self.myIndex))
               break
             case 'AllChosen':
               _self.$message.success('游戏开始')
@@ -219,6 +257,10 @@ export default {
               break
             case 'studyFail':
               _self.$message.error(data.text)
+              break
+            case 'gameover':
+              _self.finalData = JSON.parse(data.data)
+              _self.isGameover = true
               break
             default:
               break
@@ -307,6 +349,7 @@ export default {
       this.chosenCard = index
       this.selectedCard = false
       this.selectedStudyCard = false
+      this.chosenPlayerId = 0
       this.chosenProject = ''
       switch (this.players[this.myIndex].cards[index].name) {
         case '恶作剧':
@@ -382,6 +425,7 @@ export default {
     clearUseButton: function () {
       this.selectedCard = false
       this.selectedStudyCard = false
+      this.chosenPlayerId = 0
     },
     useCard: function () {
       let canUse = true
@@ -394,6 +438,10 @@ export default {
         if (this.chosenPlayerId === 0) {
           canUse = false
           this.$message.error('未选择正确的使用玩家')
+        }
+        if (this.chosenPlayerId + '' === this.myId + '') {
+          canUse = false
+          this.$message.error('不能指定自己为学习对象')
         }
         if (this.chosenProject === '') {
           canUse = false
@@ -443,9 +491,22 @@ export default {
         }
       }
       if (this.players[this.myIndex].cards[this.chosenCard].type === 3) {
-        if (this.chosenPlayerId === 0) {
-          canUse = false
-          this.$message.error('未选择正确的使用玩家')
+        if (this.players[this.myIndex].cards[this.chosenCard].name === '共渡难关' || this.players[this.myIndex].cards[this.chosenCard].name === '赠人玫瑰') {
+          if (this.chosenPlayerId === 0) {
+            canUse = false
+            this.$message.error('未选择正确的使用玩家')
+          }
+          if (this.chosenPlayerId + '' === this.myId + '') {
+            canUse = false
+            this.$message.error('不能指定自己为目标')
+          }
+        } else if (this.players[this.myIndex].cards[this.chosenCard].name === '无独有偶' || this.players[this.myIndex].cards[this.chosenCard].name === '底力爆发' || this.players[this.myIndex].cards[this.chosenCard].name === '潜心修学') {
+
+        } else {
+          if (this.chosenPlayerId === 0) {
+            canUse = false
+            this.$message.error('未选择正确的使用玩家')
+          }
         }
       }
       if (canUse) {
@@ -458,6 +519,14 @@ export default {
               cardName: (this.players[this.myIndex].cards[this.chosenCard].name),
               name: this.chosenProject,
               level: this.chosenLevel
+            }))
+            break
+          case 3:
+            this.socket.send(JSON.stringify({
+              type: '计策牌',
+              id: this.myId,
+              id2: this.chosenPlayerId,
+              name: this.players[this.myIndex].cards[this.chosenCard].name
             }))
             break
           case 4:
@@ -480,6 +549,9 @@ export default {
         type: 'disCardStage',
         id: parseInt(this.myId)
       }))
+    },
+    restart: function () {
+      location.reload()
     }
   },
   mounted () {
@@ -606,6 +678,7 @@ export default {
 }
 .willBeChosenProject:hover {
    border: 1px solid black;
+   cursor: pointer;
 }
 .selectLevelArea {
     height: 20px;
@@ -621,6 +694,13 @@ export default {
 }
 .willBeChosenLevel:hover {
    border: 1px solid black;
+   cursor: pointer;
+}
+.haveBeenSelected {
+  color: red;
+}
+.haveBeenSelectedRole {
+  border:2px solid red;
 }
 .buttonArea {
   width: 600px;
@@ -718,5 +798,16 @@ export default {
 }
 .gameStartButton {
     margin-left: 1300px;
+}
+.gameoverBackground {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1526px;
+    height: 730px;
+    background-color: rgba(255 ,255,255, 0.9);
+}
+.restartButton {
+  margin: 20px auto auto 600px;
 }
 </style>
