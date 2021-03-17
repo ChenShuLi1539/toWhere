@@ -126,6 +126,16 @@ public class GameSocket {
         sendMessage(jsonObject.toString());
     }
 
+    public void sendText (String message) throws IOException {
+        Map<String,String> map=new HashMap<>();
+        map.put("type","text");
+        map.put("name","游戏信息");
+        map.put("id","-1");
+        map.put("context",message);
+        JSONObject jsonObject=JSONObject.fromObject(map);
+        sendMessage(jsonObject.toString());
+    }
+
     public void drawCard (Player player) {
         game.drawCard(player);
         //发送抽牌信息
@@ -140,8 +150,10 @@ public class GameSocket {
         Player player=game.selectPlayerById(id);
         int drawCardTimes=5;
         if(haveThisSkill(player,"容光焕发"))
-            if(player.getMood()>game.averageMood())
+            if(player.getMood()>game.averageMood()) {
                 drawCardTimes++;
+                sendText(game.selectPlayerById(id).getRole().getName()+ "发动技能‘容光焕发’多抽了一张牌");
+            }
         if(haveThisBuff(player,"慌张"))
             drawCardTimes--;
         if(haveThisBuff(player,"怡然"))
@@ -185,12 +197,14 @@ public class GameSocket {
             map.put("text",game.selectPlayerById(id1).getRole().getName()+"与"+game.selectPlayerById(id2).getRole().getName()+"学习"+name+"成功");
             JSONObject jsonObject=JSONObject.fromObject(map);
             sendMessage(jsonObject.toString());
+            sendText(game.selectPlayerById(id1).getRole().getName()+"与"+game.selectPlayerById(id2).getRole().getName()+"学习"+name+"成功");
         } else {
             Map<String,String> map=new HashMap<>();
             map.put("type","studyFail");
             map.put("text",game.selectPlayerById(id1).getRole().getName()+"与"+game.selectPlayerById(id2).getRole().getName()+"学习"+name+"失败");
             JSONObject jsonObject=JSONObject.fromObject(map);
             sendMessage(jsonObject.toString());
+            sendText(game.selectPlayerById(id1).getRole().getName()+"与"+game.selectPlayerById(id2).getRole().getName()+"学习"+name+"失败");
         }
         sendAllPlayerMessage();
     }
@@ -220,6 +234,22 @@ public class GameSocket {
         }else {
             player.getBuffs().add(new Buff(name,description,lastTurns,isBeneficial));
         }
+    }
+
+    public void treasureCard (int id,String name) throws IOException {
+        Player player=game.selectPlayerById(id);
+        Iterator<Card> iterator = player.getCards().iterator();
+        while (iterator.hasNext()) {
+            Card a = iterator.next();
+            if (a.getName().equals(name) ) {
+                iterator.remove();
+                break;
+            }
+        }
+        player.setUsedCardsNum(player.getUsedCardsNum()+1);
+        player.getTreasures().add(new Treasure(name.substring(2)));
+        sendAllPlayerMessage();
+        sendText(game.selectPlayerById(id).getRole().getName()+ "制造出了" + name.substring(2) + "！！！");
     }
 
     public void trickCard (int id1,int id2,String name) throws IOException {
@@ -252,6 +282,11 @@ public class GameSocket {
                 drawCard(player1);break;
         }
         sendAllPlayerMessage();
+        if (name.equals("无独有偶") || name.equals("底力爆发") || name.equals("潜心修学")) {
+            sendText(game.selectPlayerById(id1).getRole().getName()+ "使用了[" + name + "]");
+        } else {
+            sendText(game.selectPlayerById(id1).getRole().getName()+"对" + game.selectPlayerById(id2).getRole().getName() + "使用了[" + name + "]");
+        }
     }
 
     public void luckyCard (int id,String name) throws IOException {
@@ -280,6 +315,7 @@ public class GameSocket {
                 }break;
         }
         sendAllPlayerMessage();
+        sendText(game.selectPlayerById(id).getRole().getName()+ "使用了[" + name + "]，对应的能力上升了");
     }
 
     public void turnOverStage (int id) throws IOException {
@@ -344,6 +380,7 @@ public class GameSocket {
             case "drawCardStage": drawCardStage(jsonObject.getInt("id"));break;
             case "disCardStage": disCardStage(jsonObject.getInt("id"));break;
             case "学习牌":studyCard(jsonObject.getInt("id"),jsonObject.getInt("id2"),jsonObject.getString("cardName"),jsonObject.getString("name"),jsonObject.getInt("level"));break;
+            case "名品牌":treasureCard(jsonObject.getInt("id"),jsonObject.getString("name"));break;
             case "计策牌":trickCard(jsonObject.getInt("id"),jsonObject.getInt("id2"),jsonObject.getString("name"));break;
             case "机缘牌":luckyCard(jsonObject.getInt("id"),jsonObject.getString("name"));break;
             case "turnOverStage":turnOverStage(jsonObject.getInt("id"));break;

@@ -14,6 +14,7 @@ public class Player {
     private List<BigProject> bigProjects=new ArrayList<>();
     private List<Card> cards=new ArrayList<>();
     private List<Buff> buffs=new ArrayList<>();
+    private List<Treasure> treasures =new ArrayList<>();
     private int usedCardsNum=0;
     private int totalScore=0;
     private int projectScore=0;
