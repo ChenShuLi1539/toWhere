@@ -24,42 +24,42 @@ public class Game {
     public void roleInit () {
         this.roles=new ArrayList<>();
         List<Skill> skills=new ArrayList<>();
-        skills.add(new Skill("幕后黑手","在你使用【计策牌】后，你的心情值+0.5"));
-        skills.add(new Skill("无谋之乐","在其他人弃牌阶段弃牌时，如果丢弃的牌中存在【计策牌】，那么你的心情值+0.3"));
+        skills.add(new Skill("幕后黑手","在你使用【计策牌】后，你的心情值+0.5",true));
+        skills.add(new Skill("无谋之乐","在其他人弃牌阶段弃牌时，如果丢弃的牌中存在【计策牌】，那么你的心情值+0.3",true));
         this.roles.add(new Role("张天舒",1,1,2,0,3,2,3,
                 "园林大师","自然-园艺熟练度达到A",5.0,skills));
         skills=new ArrayList<>();
-        skills.add(new Skill("勇壮","在游戏开始时，你获得2点勇敢和1点坚韧"));
-        skills.add(new Skill("重整旗鼓","出牌阶段，你可以丢弃3张牌，清除场上一名玩家的所有负面效果，并使其下回合抽牌数+1"));
+        skills.add(new Skill("勇壮","在游戏开始时，你获得2点勇敢和1点坚韧",true));
+        skills.add(new Skill("重整旗鼓","出牌阶段，你可以丢弃3张牌，清除场上一名玩家的所有负面效果，并使其下回合抽牌数+1",false));
         this.roles.add(new Role("兰文俊",1,3,3,3,0,3,2,
                 "武术大师","体育-武术熟练度达到A",5.0,skills));
         skills=new ArrayList<>();
-        skills.add(new Skill("珍视","弃牌阶段，你可以选择你将要丢弃的牌中的一张牌进行收藏"));
-        skills.add(new Skill("回忆","出牌阶段，取出你收藏的所有牌"));
+        skills.add(new Skill("珍视","弃牌阶段，你可以选择你将要丢弃的牌中的一张牌进行收藏",true));
+        skills.add(new Skill("回忆","出牌阶段，取出你收藏的所有牌",false));
         this.roles.add(new Role("吴童",1,2,3,3,2,0,1,
                 "世界和平","在你的最后一个回合结束时场上没有人因为心情值降为0而出局",5.0,skills));
         skills=new ArrayList<>();
-        skills.add(new Skill("青梅竹马/铁哥们","游戏开始时，选择一名玩家与其绑定成“青梅竹马/铁哥们”的关系，在之后的游戏过程中你可以与其培养“关系值”"));
-        skills.add(new Skill("纯爱战士/挚友英灵","当你与“青梅竹马/铁哥们”一起学习时，双方对该项目的感兴趣程度临时上升一级（但不会超过上限）。学习成功后，你与对方的关系值+1"));
+        skills.add(new Skill("青梅竹马/铁哥们","游戏开始时，选择一名玩家与其绑定成“青梅竹马/铁哥们”的关系，在之后的游戏过程中你可以与其培养“关系值”",true));
+        skills.add(new Skill("纯爱战士/挚友英灵","当你与“青梅竹马/铁哥们”一起学习时，双方对该项目的感兴趣程度临时上升一级（但不会超过上限）。学习成功后，你与对方的关系值+1",true));
         this.roles.add(new Role("徐东东",1,2,2,3,2,1,1,
                 "心灵伴侣/情同手足","在游戏结算时，与你绑定了“青梅竹马/铁哥们”关系的玩家达成了人生目标并且你与对方的关系值不低于36",5.0,skills));
         skills=new ArrayList<>();
-        skills.add(new Skill("再接再厉","在你制造出名品之后，你对所有项目的期待值增加2.0"));
-        skills.add(new Skill("文思泉涌","在你的回合开始时，如果你的心情值达到了15及以上，从剩余的牌堆中抽取一张【名品牌】"));
+        skills.add(new Skill("触类旁通","在你制造出名品之后，你对所有项目的熟练度增加2.0",true));
+        skills.add(new Skill("文思泉涌","在你的回合开始时，如果你的心情值达到了15及以上，从剩余的牌堆中抽取一张【名品牌】",true));
         this.roles.add(new Role("陈树力",1,2,1,2,1,3,2,
                 "实现梦想","在你的最后一个回合结束时你至少拥有一件名品",5.0,skills));
         skills=new ArrayList<>();
-        skills.add(new Skill("容光焕发","摸牌阶段，如果你的心情值高于全场的平均值，你本回合的抽牌数+1"));
-        skills.add(new Skill("否极泰来","弃牌阶段，如果你丢弃了超过三张牌，你的所有天性+1"));
+        skills.add(new Skill("容光焕发","摸牌阶段，如果你的心情值高于全场的平均值，你本回合的抽牌数+1",true));
+        skills.add(new Skill("否极泰来","弃牌阶段，如果你丢弃了超过三张牌，你的所有天性+1",true));
         this.roles.add(new Role("廖纪童",1,2,0,1,2,1,2,
                 "随心所欲","在你的最后一个回合结束时，你至少已经打出了40张牌",5.0,skills));
         skills=new ArrayList<>();
-        skills.add(new Skill("再生力","你的回合开始时，如果你的心情值低于全场的平均值，你的心情值+0.5"));
-        skills.add(new Skill("熟能生巧","出牌阶段，你可以消耗1.0心情值，对场上任意一名玩家使用，使其下回合通过【学习牌】获得的熟练度+1"));
+        skills.add(new Skill("再生力","你的回合开始时，如果你的心情值低于全场的平均值，你的心情值+0.5",true));
+        skills.add(new Skill("熟能生巧","出牌阶段，你可以消耗1.0心情值，对场上任意一名玩家使用，使其下回合通过【学习牌】获得的熟练度+1",false));
         this.roles.add(new Role("杨礼政",1,2,2,0,2,3,2,
                 "世界和平","在你的最后一个回合结束时场上没有人因为心情值降为0而出局",5.0,skills));
         skills=new ArrayList<>();
-        skills.add(new Skill("醉生梦死","出牌阶段，你可以丢弃一定数量的牌，根据丢弃的牌的数量决定接下来效果发生的次数：使你下一位玩家的心情值减少0.3，如果还丢弃有牌，则使该角色的往后第二位玩家心情值增加0.6，如果还丢弃有牌，则是该角色的往后第三位玩家心情值降低0.9，以此类推。每回合限一次\n"));
+        skills.add(new Skill("醉生梦死","出牌阶段，你可以丢弃一定数量的牌，根据丢弃的牌的数量决定接下来效果发生的次数：使你下一位玩家的心情值减少0.3，如果还丢弃有牌，则使该角色的往后第二位玩家心情值增加0.6，如果还丢弃有牌，则是该角色的往后第三位玩家心情值降低0.9，以此类推。每回合限一次",false));
         this.roles.add(new Role("覃思宁",1,3,1,2,1,1,1,
                 "生而活","在你的最后一个回合结束时，你至少有两个项目熟练度达到C及以上",5.0,skills));
     }
@@ -298,6 +298,12 @@ public class Game {
             case 5:mastery+=7.0;break;
         }
         //其他影响熟练度的技能
+        for (Buff buff:player.getBuffs()) {
+            switch (buff.getName()) {
+                case "熟练":mastery++;break;
+                default:break;
+            }
+        }
         if (mastery>50.0)
             mastery=50.0;
         smallProject.setMastery(mastery);
