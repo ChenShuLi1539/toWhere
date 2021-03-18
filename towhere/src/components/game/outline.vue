@@ -5,12 +5,22 @@
     <el-main class="mainArea">
         <div class="gametable">
             <div class="chooseRoleArea" v-show="choosingRole">
-                <div class="chooseRoleArea-header">请选择你的游戏角色</div>
-                <div class="chooseRoleArea-main" >
-                    <div class="roles" v-for="(each,index) in roles" v-bind:key="index" @click="chooseRole(index)">
-                        {{each.name}}
-                    </div>
-                </div>
+              <div class="chooseRoleArea-header">请选择你的游戏角色</div>
+              <div class="chooseRoleArea-main" >
+                    <el-tooltip placement="top"   v-for="(each,index7) in roles" v-bind:key="index7">
+                      <div slot="content"><strong>{{each.name}}    性别：</strong><strong v-if="each.sex === 0">女</strong><strong v-if="each.sex === 1">男</strong>
+                        <div style="display:flex">天性：<div v-for="(e,index) in each.natures" v-bind:key="index" style="margin-right:5px">{{each.natures[index].name}}：{{each.natures[index].level}}  </div></div>
+                        <div>人生目标-{{each.target.name}}：{{each.target.description}}</div>
+                        <div>技能：</div>
+                        <div   v-for="(e,index4) in each.skills" v-bind:key="index4">
+                          {{each.skills[index4].name}}：{{each.skills[index4].description}}
+                        </div>
+                      </div>
+                      <div class="roles" @click="chooseRole(index7)">
+                          {{each.name}}
+                      </div>
+                    </el-tooltip>
+              </div>
             </div>
 
               <el-tooltip placement="top"  v-if="players.length===2" >
@@ -21,7 +31,7 @@
                       {{players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].name}}：
                       <div  v-for="(each,index3) in players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects" v-bind:key="index3" style="display:flex;margin-right:5px">
                         {{players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].name}}
-                        (<strong v-if="players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].mastery < 10">F</strong><strong v-if="players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].eagerness>=10&&players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].eagerness<17">E</strong><strong v-if="players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].eagerness>=17&&players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].eagerness<25">D</strong><strong v-if="players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].eagerness>=25&&players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].eagerness<35">C</strong><strong v-if="players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].eagerness>=35&&players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].eagerness<45">B</strong><strong v-if="players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].eagerness>=45">A</strong>)
+                        (<strong v-if="players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].mastery < 10">F</strong><strong v-if="players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].mastery>=10&&players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].mastery<17">E</strong><strong v-if="players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].mastery>=17&&players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].mastery<25">D</strong><strong v-if="players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].mastery>=25&&players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].mastery<35">C</strong><strong v-if="players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].mastery>=35&&players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].mastery<45">B</strong><strong v-if="players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].mastery>=45">A</strong>)
                       </div>
                     </div>
                     <div>技能：</div>
@@ -51,7 +61,7 @@
                       {{players[index0].bigProjects[index2].name}}：
                       <div  v-for="(each,index3) in players[index0].bigProjects[index2].smallProjects" v-bind:key="index3" style="display:flex;margin-right:5px">
                         {{players[index0].bigProjects[index2].smallProjects[index3].name}}
-                        (<strong v-if="players[index0].bigProjects[index2].smallProjects[index3].mastery < 10">F</strong><strong v-if="players[index0].bigProjects[index2].smallProjects[index3].eagerness>=10&&players[index0].bigProjects[index2].smallProjects[index3].eagerness<17">E</strong><strong v-if="players[index0].bigProjects[index2].smallProjects[index3].eagerness>=17&&players[index0].bigProjects[index2].smallProjects[index3].eagerness<25">D</strong><strong v-if="players[index0].bigProjects[index2].smallProjects[index3].eagerness>=25&&players[index0].bigProjects[index2].smallProjects[index3].eagerness<35">C</strong><strong v-if="players[index0].bigProjects[index2].smallProjects[index3].eagerness>=35&&players[index0].bigProjects[index2].smallProjects[index3].eagerness<45">B</strong><strong v-if="players[index0].bigProjects[index2].smallProjects[index3].eagerness>=45">A</strong>)
+                        (<strong v-if="players[index0].bigProjects[index2].smallProjects[index3].mastery < 10">F</strong><strong v-if="players[index0].bigProjects[index2].smallProjects[index3].mastery>=10&&players[index0].bigProjects[index2].smallProjects[index3].mastery<17">E</strong><strong v-if="players[index0].bigProjects[index2].smallProjects[index3].mastery>=17&&players[index0].bigProjects[index2].smallProjects[index3].mastery<25">D</strong><strong v-if="players[index0].bigProjects[index2].smallProjects[index3].mastery>=25&&players[index0].bigProjects[index2].smallProjects[index3].mastery<35">C</strong><strong v-if="players[index0].bigProjects[index2].smallProjects[index3].mastery>=35&&players[index0].bigProjects[index2].smallProjects[index3].mastery<45">B</strong><strong v-if="players[index0].bigProjects[index2].smallProjects[index3].mastery>=45">A</strong>)
                       </div>
                     </div>
                     <div>技能：</div>
@@ -84,7 +94,7 @@
                       {{players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].name}}：
                       <div  v-for="(each,index3) in players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects" v-bind:key="index3" style="display:flex;margin-right:5px">
                         {{players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].name}}
-                        (<strong v-if="players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].mastery < 10">F</strong><strong v-if="players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].eagerness>=10&&players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].eagerness<17">E</strong><strong v-if="players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].eagerness>=17&&players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].eagerness<25">D</strong><strong v-if="players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].eagerness>=25&&players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].eagerness<35">C</strong><strong v-if="players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].eagerness>=35&&players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].eagerness<45">B</strong><strong v-if="players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].eagerness>=45">A</strong>)
+                        (<strong v-if="players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].mastery < 10">F</strong><strong v-if="players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].mastery>=10&&players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].mastery<17">E</strong><strong v-if="players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].mastery>=17&&players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].mastery<25">D</strong><strong v-if="players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].mastery>=25&&players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].mastery<35">C</strong><strong v-if="players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].mastery>=35&&players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].mastery<45">B</strong><strong v-if="players[(parseInt(myIndex)+1)%players.length].bigProjects[index2].smallProjects[index3].mastery>=45">A</strong>)
                       </div>
                     </div>
                     <div>技能：</div>
@@ -113,7 +123,7 @@
                       {{players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].name}}：
                       <div  v-for="(each,index3) in players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects" v-bind:key="index3" style="display:flex;margin-right:5px">
                         {{players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].name}}
-                        (<strong v-if="players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].mastery < 10">F</strong><strong v-if="players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].eagerness>=10&&players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].eagerness<17">E</strong><strong v-if="players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].eagerness>=17&&players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].eagerness<25">D</strong><strong v-if="players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].eagerness>=25&&players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].eagerness<35">C</strong><strong v-if="players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].eagerness>=35&&players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].eagerness<45">B</strong><strong v-if="players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].eagerness>=45">A</strong>)
+                        (<strong v-if="players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].mastery < 10">F</strong><strong v-if="players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].mastery>=10&&players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].mastery<17">E</strong><strong v-if="players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].mastery>=17&&players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].mastery<25">D</strong><strong v-if="players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].mastery>=25&&players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].mastery<35">C</strong><strong v-if="players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].mastery>=35&&players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].mastery<45">B</strong><strong v-if="players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].mastery>=45">A</strong>)
                       </div>
                     </div>
                     <div>技能：</div>
@@ -147,9 +157,13 @@
                 </div>
             </div>
 
+            <div class="selectSkillTips" v-show="selectedSkill">{{tips}}</div>
+
             <div class="buttonArea">
                 <el-button type="primary" round class="useCardButton-true" v-if="selectedCard" @click="useCard()">使用</el-button>
                 <el-button type="danger" round class="useCardButton-false" v-if="selectedCard" @click="clearUseButton()">取消</el-button>
+                <el-button type="primary" round class="useCardButton-true" v-if="selectedSkill" @click="useSkill()">使用</el-button>
+                <el-button type="danger" round class="useCardButton-false" v-if="selectedSkill" @click="clearSkillButton()">取消</el-button>
             </div>
             <el-button type="primary" round class="turnoverButton" v-if="isturnStart" @click="turnOver()">回合结束</el-button>
         </div>
@@ -188,15 +202,17 @@
         </div>
     </el-main>
     <el-footer height='200px' class="footer">
-        <div class="buffArea"></div>
+        <div class="buffArea" v-if="AllChosen">
+          <div class="buff" v-for="(each,index) in players[myIndex].buffs" v-bind:key="index">{{players[myIndex].buffs[index].name}}({{players[myIndex].buffs[index].lastTurns}})</div>
+        </div>
         <div class="cardArea" v-if="AllChosen">
           <el-tooltip class="item" effect="dark" :content="players[myIndex].cards[index].description" placement="top-start"  v-for="(each,index) in players[myIndex].cards" v-bind:key="index">
-            <div class="card" tabindex="0" @click="choosingCard(index)">
+            <div class="card" tabindex="0" @click="choosingCard(index)" :class="{multipleChoose: canFind(selectedCards,index)}">
               {{each.name}}
             </div>
           </el-tooltip>
         </div>
-        <el-tooltip placement="top" v-if="AllChosen" @click="chooseThisPlayer(myIndex)" v-bind:class="{haveBeenSelectedRole: chosenPlayerId === players[myIndex].id}">
+        <el-tooltip placement="top" v-if="AllChosen"  v-bind:class="{haveBeenSelectedRole: chosenPlayerId === players[myIndex].id}">
           <div slot="content"><strong>{{players[myIndex].role.name}}    性别：</strong><strong v-if="players[myIndex].role.sex === 0">女</strong><strong v-if="players[myIndex].role.sex === 1">男</strong>
                 <div style="display:flex">天性：<div v-for="(each,index) in players[myIndex].role.natures" v-bind:key="index" style="margin-right:5px">{{players[myIndex].role.natures[index].name}}：{{players[myIndex].role.natures[index].level}}  </div></div>
                 <div>人生目标-{{players[myIndex].role.target.name}}：{{players[myIndex].role.target.description}}</div>
@@ -205,7 +221,7 @@
                   <div  v-for="(each,index3) in players[myIndex].bigProjects[index2].smallProjects" v-bind:key="index3" style="display:flex;margin-right:5px">
                     {{players[myIndex].bigProjects[index2].smallProjects[index3].name}}
                     (<strong v-if="players[myIndex].bigProjects[index2].smallProjects[index3].eagerness === 0">×</strong><strong v-if="players[myIndex].bigProjects[index2].smallProjects[index3].eagerness === 1">△</strong><strong v-if="players[myIndex].bigProjects[index2].smallProjects[index3].eagerness === 2">○</strong><strong v-if="players[myIndex].bigProjects[index2].smallProjects[index3].eagerness === 3">◎</strong>)
-                    (<strong v-if="players[myIndex].bigProjects[index2].smallProjects[index3].mastery < 10">F</strong><strong v-if="players[myIndex].bigProjects[index2].smallProjects[index3].eagerness>=10&&players[myIndex].bigProjects[index2].smallProjects[index3].eagerness<17">E</strong><strong v-if="players[myIndex].bigProjects[index2].smallProjects[index3].eagerness>=17&&players[myIndex].bigProjects[index2].smallProjects[index3].eagerness<25">D</strong><strong v-if="players[myIndex].bigProjects[index2].smallProjects[index3].eagerness>=25&&players[myIndex].bigProjects[index2].smallProjects[index3].eagerness<35">C</strong><strong v-if="players[myIndex].bigProjects[index2].smallProjects[index3].eagerness>=35&&players[myIndex].bigProjects[index2].smallProjects[index3].eagerness<45">B</strong><strong v-if="players[myIndex].bigProjects[index2].smallProjects[index3].eagerness>=45">A</strong>)
+                    (<strong v-if="players[myIndex].bigProjects[index2].smallProjects[index3].mastery < 10">F</strong><strong v-if="players[myIndex].bigProjects[index2].smallProjects[index3].mastery>=10&&players[myIndex].bigProjects[index2].smallProjects[index3].mastery<17">E</strong><strong v-if="players[myIndex].bigProjects[index2].smallProjects[index3].mastery>=17&&players[myIndex].bigProjects[index2].smallProjects[index3].mastery<25">D</strong><strong v-if="players[myIndex].bigProjects[index2].smallProjects[index3].mastery>=25&&players[myIndex].bigProjects[index2].smallProjects[index3].mastery<35">C</strong><strong v-if="players[myIndex].bigProjects[index2].smallProjects[index3].mastery>=35&&players[myIndex].bigProjects[index2].smallProjects[index3].mastery<45">B</strong><strong v-if="players[myIndex].bigProjects[index2].smallProjects[index3].mastery>=45">A</strong>)
                     {{players[myIndex].bigProjects[index2].smallProjects[index3].mastery}}/50
                   </div>
                 </div>
@@ -217,12 +233,17 @@
                   已制作的名品：<div   v-for="(each,index5) in players[myIndex].treasures" v-bind:key="index5" style="margin-right:5px">{{players[myIndex].treasures[index5].name}}</div>
                 </div>
           </div>
-          <div class="roleArea">
+          <div class="roleArea" @click="chooseThisPlayer(myIndex)">
             <div class="roleArea-header">
               <div class="roleArea-header-left">{{players[myIndex].name}}</div>
               <div class="roleArea-header-right">❤×{{this.players[this.myIndex].mood}}</div>
             </div>
-            <div class="roleArea-footer">{{this.players[this.myIndex].role.name}}</div>
+            <div class="roleArea-mid">{{this.players[this.myIndex].role.name}}</div>
+            <div class="roleArea-footer">
+              <div class="roleArea-skill" v-for="(each,index) in players[myIndex].role.skills" v-bind:key="index">
+                <el-button class="skill" type="success" round v-if="!players[myIndex].role.skills[index].automatic" @click="choosingSkill(index)">{{players[myIndex].role.skills[index].name}}</el-button>
+              </div>
+            </div>
           </div>
         </el-tooltip>
     </el-footer>
@@ -315,6 +336,12 @@ export default {
       chosenPlayerId: 0,
       chosenLevel: -1,
       chosenProject: '',
+
+      // 使用技能时的参数
+      choenSkill: '',
+      selectedSkill: false,
+      selectedCards: [],
+      tips: '',
 
       isGameover: false,
       finalData: []
@@ -497,94 +524,140 @@ export default {
       console.log(index)
       this.chosenPlayerId = this.players[index].id
     },
-    choosingCard: function (index) {
-      let canUse = true
-      this.chosenCard = index
-      this.selectedCard = false
-      this.selectedStudyCard = false
-      this.chosenPlayerId = 0
-      this.chosenProject = ''
-      switch (this.players[this.myIndex].cards[index].name) {
-        case '恶作剧':
-          if (this.players[this.myIndex].role.natures[2].level < 5) { canUse = false }
-          break
-        case '整蛊':
-          if (this.players[this.myIndex].role.natures[2].level < 8) { canUse = false }
-          break
-        case '振奋':
-          if (this.players[this.myIndex].role.natures[1].level < 2) { canUse = false }
-          break
-        case '共渡难关':
-          if (this.players[this.myIndex].role.natures[1].level < 7) { canUse = false }
-          break
-        case '灵感':
-          if (this.players[this.myIndex].role.natures[0].level < 5) { canUse = false }
-          break
-        case '无独有偶':
-          if (this.players[this.myIndex].role.natures[0].level < 7) { canUse = false }
-          break
-        case '底力爆发':
-          if (this.players[this.myIndex].role.natures[4].level < 3) { canUse = false }
-          break
-        case '柳暗花明':
-          if (this.players[this.myIndex].role.natures[4].level < 9) { canUse = false }
-          break
-        case '深呼吸':
-          if (this.players[this.myIndex].role.natures[3].level < 6) { canUse = false }
-          break
-        case '赠人玫瑰':
-          if (this.players[this.myIndex].role.natures[3].level < 8) { canUse = false }
-          break
-        case '留一手':
-          if (this.players[this.myIndex].role.natures[5].level < 4) { canUse = false }
-          break
-        case '潜心修学':
-          if (this.players[this.myIndex].role.natures[5].level < 9) { canUse = false }
-          break
-        case '制作独立音乐':
-          if (this.players[this.myIndex].bigProjects[1].smallProjects[0].mastery < 25) { canUse = false }
-          break
-        case '制作玩具模型':
-          if (this.players[this.myIndex].bigProjects[3].smallProjects[0].mastery < 17 || this.players[this.myIndex].bigProjects[5].smallProjects[1].mastery < 17) { canUse = false }
-          break
-        default:
-          break
+    canFind: function (selectedCards, index) {
+      for (const each in selectedCards) {
+        if (selectedCards[each] === index) { return true }
       }
-      if (canUse) {
-        this.selectedCard = true
-        if (this.players[this.myIndex].cards[index].type === 0) {
-          this.selectedStudyCard = true
+      return false
+    },
+    indexOf: function (selectedCards, index) {
+      for (const each in selectedCards) {
+        if (selectedCards[each] === index) { return each }
+      }
+      return -1
+    },
+    choosingCard: function (index) {
+      if (this.isturnStart) {
+        if (this.selectedSkill) {
+          if (this.canFind(this.selectedCards, index)) {
+            this.selectedCards.splice(this.indexOf(this.selectedCards, index), 1)
+          } else {
+            this.selectedCards.push(index)
+          }
+          console.log(this.selectedCards)
+        } else {
+          let canUse = true
+          this.chosenCard = index
+          this.selectedCard = false
+          this.selectedStudyCard = false
+          this.chosenPlayerId = 0
+          this.chosenProject = ''
           switch (this.players[this.myIndex].cards[index].name) {
-            case '学习体育':
-              this.selectedProject = ['球类', '田径', '水上项目', '武术']
+            case '恶作剧':
+              if (this.players[this.myIndex].role.natures[2].level < 5) { canUse = false }
               break
-            case '学习音乐':
-              this.selectedProject = ['乐器', '声乐']
+            case '整蛊':
+              if (this.players[this.myIndex].role.natures[2].level < 8) { canUse = false }
               break
-            case '学习文学':
-              this.selectedProject = ['小说', '散文', '报道']
+            case '振奋':
+              if (this.players[this.myIndex].role.natures[1].level < 2) { canUse = false }
               break
-            case '学习美术':
-              this.selectedProject = ['绘画', '服饰', '建筑']
+            case '共渡难关':
+              if (this.players[this.myIndex].role.natures[1].level < 7) { canUse = false }
               break
-            case '学习自然':
-              this.selectedProject = ['动物培育', '园艺', '天文', '地理']
+            case '灵感':
+              if (this.players[this.myIndex].role.natures[0].level < 5) { canUse = false }
               break
-            case '学习生活':
-              this.selectedProject = ['八卦', '手工', '厨艺', '游戏']
+            case '无独有偶':
+              if (this.players[this.myIndex].role.natures[0].level < 7) { canUse = false }
+              break
+            case '底力爆发':
+              if (this.players[this.myIndex].role.natures[4].level < 3) { canUse = false }
+              break
+            case '柳暗花明':
+              if (this.players[this.myIndex].role.natures[4].level < 9) { canUse = false }
+              break
+            case '深呼吸':
+              if (this.players[this.myIndex].role.natures[3].level < 6) { canUse = false }
+              break
+            case '赠人玫瑰':
+              if (this.players[this.myIndex].role.natures[3].level < 8) { canUse = false }
+              break
+            case '留一手':
+              if (this.players[this.myIndex].role.natures[5].level < 4) { canUse = false }
+              break
+            case '潜心修学':
+              if (this.players[this.myIndex].role.natures[5].level < 9) { canUse = false }
+              break
+            case '制作独立音乐':
+              if (this.players[this.myIndex].bigProjects[1].smallProjects[0].mastery < 25) { canUse = false }
+              break
+            case '制作玩具模型':
+              if (this.players[this.myIndex].bigProjects[3].smallProjects[0].mastery < 17 || this.players[this.myIndex].bigProjects[5].smallProjects[1].mastery < 17) { canUse = false }
               break
             default:
               break
           }
+          if (canUse) {
+            this.selectedCard = true
+            if (this.players[this.myIndex].cards[index].type === 0) {
+              this.selectedStudyCard = true
+              switch (this.players[this.myIndex].cards[index].name) {
+                case '学习体育':
+                  this.selectedProject = ['球类', '田径', '水上项目', '武术']
+                  break
+                case '学习音乐':
+                  this.selectedProject = ['乐器', '声乐']
+                  break
+                case '学习文学':
+                  this.selectedProject = ['小说', '散文', '报道']
+                  break
+                case '学习美术':
+                  this.selectedProject = ['绘画', '服饰', '建筑']
+                  break
+                case '学习自然':
+                  this.selectedProject = ['动物培育', '园艺', '天文', '地理']
+                  break
+                case '学习生活':
+                  this.selectedProject = ['八卦', '手工', '厨艺', '游戏']
+                  break
+                default:
+                  break
+              }
+            }
+          } else {
+            this.$message.error('你未达到这张牌的使用条件')
+          }
         }
       } else {
-        this.$message.error('你未达到这张牌的使用条件')
+        this.$message.error('现在还不是你的回合')
       }
     },
     clearUseButton: function () {
       this.selectedCard = false
       this.selectedStudyCard = false
       this.chosenPlayerId = 0
+    },
+    choosingSkill: function (index) {
+      if (this.isturnStart) {
+        this.clearUseButton()
+        switch (this.players[this.myIndex].role.skills[index].name) {
+          case '熟能生巧':
+            if (this.players[this.myIndex].mood > 1.0) {
+              this.tips = '请选择一名角色'
+              this.selectedSkill = true
+              this.chosenSkill = '熟能生巧'
+            } else {
+              this.$message.error('你当前的心情值不足以发动此技能')
+            }
+            break
+
+          default:
+            break
+        }
+      } else {
+        this.$message.error('现在还不是你的回合')
+      }
     },
     useCard: function () {
       let canUse = true
@@ -707,6 +780,36 @@ export default {
         }
         this.clearUseButton()
       }
+    },
+    useSkill: function () {
+      let canUse = true
+      switch (this.chosenSkill) {
+        case '熟能生巧':
+          if (this.chosenPlayerId < 1) {
+            this.$message.error('未选择正确的使用玩家')
+            canUse = false
+          }
+          break
+
+        default:
+          break
+      }
+      if (canUse) {
+        this.socket.send(JSON.stringify({
+          type: 'Skill',
+          id: this.myId,
+          id2: this.chosenPlayerId,
+          name: this.chosenSkill,
+          cards: this.selectedCards
+        }))
+        this.clearSkillButton()
+      }
+    },
+    clearSkillButton: function () {
+      this.choenSkill = ''
+      this.selectedSkill = false
+      this.selectedCards = []
+      this.tips = ''
     },
     turnOver: function () {
       this.isturnStart = false
@@ -888,6 +991,13 @@ export default {
    border: 1px solid black;
    cursor: pointer;
 }
+.selectSkillTips {
+  margin: 20px auto 0 550px;
+  color: #E6A23C;
+  font-size: 26px;
+  font-family: "Microsoft Yahei", sans-serif;
+  letter-spacing: 0.032cm;
+}
 .haveBeenSelected {
   color: red;
 }
@@ -969,6 +1079,11 @@ export default {
 .buffArea {
     border: solid 1px yellow;
     flex: 1;
+    display: flex;
+}
+.buff {
+  border:1px solid black;
+  border-radius: 1px;
 }
 .cardArea {
     border: solid 1px yellow;
@@ -993,6 +1108,9 @@ export default {
   margin: -20px 5px 40px;
 }
 .card:focus {
+  margin: -20px 5px 40px;
+}
+.multipleChoose {
   border: 4px solid #46A3FF;
   margin: -20px 5px 40px;
 }
@@ -1010,12 +1128,21 @@ export default {
     margin: 10px 10px auto auto;
     color: #FF2D2D;
 }
-.roleArea-footer {
-    line-height: 160px;
+.roleArea-mid {
+    line-height: 120px;
     text-align: center;
     font-size: 26px;
     font-family: "Microsoft Yahei", sans-serif;
     letter-spacing: 0.032cm;
+}
+.roleArea-footer {
+  height: 20px;
+  width: 100%;
+  display: flex;
+  margin: -10px auto;
+}
+.skill {
+  margin: auto 10px;
 }
 .waitingRoomArea {
     width: 1280px;

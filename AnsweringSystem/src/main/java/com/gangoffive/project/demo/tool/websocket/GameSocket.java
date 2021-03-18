@@ -108,6 +108,28 @@ public class GameSocket {
             sendMessage(jsonObject.toString());
             game=new Game();
         }else {
+            if (haveThisSkill(player,"文思泉涌") && player.getMood()>=15.0) {
+                Iterator<Card> iterator = game.getCards().iterator();
+                boolean gotit = false;
+                while (iterator.hasNext()) {
+                    Card a = iterator.next();
+                    if (a.getType()== 2 ) {
+                        player.getCards().add(a);
+                        iterator.remove();
+                        gotit = true;
+                        break;
+                    }
+                }
+                if(gotit)
+                    sendText(player.getRole().getName()+"发动‘文思泉涌’，从剩余的牌堆中抽取了一张【名品牌】");
+                else
+                    sendText(player.getRole().getName()+"发动‘文思泉涌’，但是剩余的牌堆中没有【名品牌】");
+            }
+            if (haveThisSkill(player,"再生力") && player.getMood()<game.averageMood()) {
+                player.setMood(player.getMood()+0.5);
+                sendText(player.getRole().getName()+"发动‘再生力’提高了自己的心情值");
+            }
+            sendAllPlayerMessage();
             //向前端询问这个人物是否有主动技能
              Map<String,String> map1=new HashMap<>();
             map1.put("type","turnStartStage");
@@ -165,10 +187,29 @@ public class GameSocket {
 
     public void disCardStage (int id) throws IOException {
         Player player=game.selectPlayerById(id);
+        boolean haveTrickCard=false;
+        for (Card e:player.getCards()) {
+            if(e.getType()==3)
+                haveTrickCard=true;
+        }
+        if(haveTrickCard) {
+            for (Player e:game.getPlayers()) {
+                if (e.getId()!=id && haveThisSkill(e,"无谋之乐")) {
+                    e.setMood(game.mathRound(e.getMood()+0.3));
+                    sendText(e.getRole().getName()+"因"+player.getRole().getName()+"丢弃了【计策牌】而增加了心情值");
+                }
+            }
+        }
+        if(player.getCards().size()>3 && haveThisSkill(player,"否极泰来")) {
+            for (Nature e:player.getRole().getNatures()) {
+                e.setLevel(e.getLevel()+1);
+            }
+            sendText(player.getRole().getName()+"因为丢弃了超过三张牌发动了技能‘否极泰来’");
+        }
         disCard(player);
         sendAllPlayerMessage();
         Map<String,String> map1=new HashMap<>();
-        map1.put("type","turnOverStage");
+        map1.put("type","disCardStage");
         map1.put("id",id+"");
         JSONObject jsonObject=JSONObject.fromObject(map1);
         sendMessage(jsonObject.toString());
@@ -250,6 +291,13 @@ public class GameSocket {
         player.getTreasures().add(new Treasure(name.substring(2)));
         sendAllPlayerMessage();
         sendText(game.selectPlayerById(id).getRole().getName()+ "制造出了" + name.substring(2) + "！！！");
+        if (haveThisSkill(player,"触类旁通")) {
+            for (BigProject e:player.getBigProjects()) {
+                for (SmallProject each:e.getSmallProjects())
+                    each.setMastery(each.getMastery()+2.0);
+            }
+            sendText(game.selectPlayerById(id).getRole().getName()+ "因为制造出了名品而发动了‘触类旁通’");
+        }
     }
 
     public void trickCard (int id1,int id2,String name) throws IOException {
@@ -280,6 +328,10 @@ public class GameSocket {
             case "留一手":addBuff(player2,"不服输","学习失败时获得的期待值+0.3",1,true);break;
             case "潜心修学":for (int i=0;i<player1.getRole().getNatures().get(5).getLevel()-player1.getRole().getNatures().get(2).getLevel();i++)
                 drawCard(player1);break;
+        }
+        if(haveThisSkill(player1,"幕后黑手")){
+            player1.setMood(player1.getMood()+0.5);
+            sendText(game.selectPlayerById(id1).getRole().getName()+"发动‘幕后黑手’技能增加了心情值");
         }
         sendAllPlayerMessage();
         if (name.equals("无独有偶") || name.equals("底力爆发") || name.equals("潜心修学")) {
@@ -316,6 +368,19 @@ public class GameSocket {
         }
         sendAllPlayerMessage();
         sendText(game.selectPlayerById(id).getRole().getName()+ "使用了[" + name + "]，对应的能力上升了");
+    }
+
+    public void useSkill (int id1,int id2,String name,List<Card> cards) throws IOException {
+        Player player1=game.selectPlayerById(id1);
+        Player player2=game.selectPlayerById(id2);
+        switch (name) {
+            case "熟能生巧":player1.setMood(player1.getMood()-1.0);
+                        addBuff(player2,"熟练","下回合通过【学习牌】获得的熟练度+1",1,true);
+                        sendText(player1.getRole().getName()+"使用了‘熟能生巧’为"+player2.getRole().getName()+"添加了buff");
+                        break;
+            default:break;
+        }
+        sendAllPlayerMessage();
     }
 
     public void turnOverStage (int id) throws IOException {
@@ -383,6 +448,7 @@ public class GameSocket {
             case "名品牌":treasureCard(jsonObject.getInt("id"),jsonObject.getString("name"));break;
             case "计策牌":trickCard(jsonObject.getInt("id"),jsonObject.getInt("id2"),jsonObject.getString("name"));break;
             case "机缘牌":luckyCard(jsonObject.getInt("id"),jsonObject.getString("name"));break;
+            case "Skill":useSkill(jsonObject.getInt("id"),jsonObject.getInt("id2"),jsonObject.getString("name"),JSONArray.toList(jsonObject.getJSONArray("cards"),Card.class));break;
             case "turnOverStage":turnOverStage(jsonObject.getInt("id"));break;
             default:sendMessage(message);break;
         }
