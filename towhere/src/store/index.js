@@ -9,12 +9,12 @@ export default new Vuex.Store({
     key: 'GOF',
     iv: 'gof',
     eventBus: new Vue(),
-    // HTTPBaseURL: 'https://www.lanwenjun.ltd:8085',
+    HTTPBaseURL: 'http://192.168.0.106:8085',
     // WebSocketBaseURL: 'wss://www.lanwenjun.ltd:8085'
     // HTTPBaseURL: 'http://192.168.43.48:8085',
     // WebSocketBaseURL: 'ws://192.168.43.48:8085'
-    HTTPBaseURL: 'http://localhost:8085',
-    WebSocketBaseURL: 'ws://localhost:8085'
+    // HTTPBaseURL: 'http://localhost:8085',
+    WebSocketBaseURL: 'ws://192.168.0.106:8085'
   },
   getters: {
     encrypt: (state) => (text) => {

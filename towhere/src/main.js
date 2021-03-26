@@ -11,6 +11,11 @@ Vue.use(VueCookies)
 
 Vue.config.productionTip = false
 
+// axios.defaults.withCredentials = true
+// // axios.defaults.crossDomain=true
+// Vue.config.productionTip = false
+// Vue.prototype.$axios = axios
+
 new Vue({
   router,
   store,
