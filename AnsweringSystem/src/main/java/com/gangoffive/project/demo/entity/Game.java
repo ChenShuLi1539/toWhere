@@ -30,7 +30,7 @@ public class Game {
                 "园林大师","自然-园艺熟练度达到A",5.0,skills));
         skills=new ArrayList<>();
         skills.add(new Skill("勇壮","在游戏开始时，你获得2点勇敢和1点坚韧",true));
-        skills.add(new Skill("重整旗鼓","出牌阶段，你可以丢弃3张牌，清除场上一名玩家的所有负面效果，并使其下回合抽牌数+1",false));
+        skills.add(new Skill("重整旗鼓","出牌阶段，你可以丢弃3张牌，清除场上一名玩家的所有负面效果，并使其抽一张牌",false));
         this.roles.add(new Role("兰文俊",1,3,3,3,0,3,2,
                 "武术大师","体育-武术熟练度达到A",5.0,skills));
         skills=new ArrayList<>();
@@ -47,12 +47,12 @@ public class Game {
         skills.add(new Skill("触类旁通","在你制造出名品之后，你对所有项目的熟练度增加2.0",true));
         skills.add(new Skill("文思泉涌","在你的回合开始时，如果你的心情值达到了15及以上，从剩余的牌堆中抽取一张【名品牌】",true));
         this.roles.add(new Role("陈树力",1,2,1,2,1,3,2,
-                "实现梦想","在你的最后一个回合结束时你至少拥有一件名品",5.0,skills));
+                "实现梦想","制造出一件名品",5.0,skills));
         skills=new ArrayList<>();
         skills.add(new Skill("容光焕发","摸牌阶段，如果你的心情值高于全场的平均值，你本回合的抽牌数+1",true));
         skills.add(new Skill("否极泰来","弃牌阶段，如果你丢弃了超过三张牌，你的所有天性+1",true));
         this.roles.add(new Role("廖纪童",1,2,0,1,2,1,2,
-                "随心所欲","在你的最后一个回合结束时，你至少已经打出了40张牌",5.0,skills));
+                "随心所欲","累计打出40张牌",5.0,skills));
         skills=new ArrayList<>();
         skills.add(new Skill("再生力","你的回合开始时，如果你的心情值低于全场的平均值，你的心情值+0.5",true));
         skills.add(new Skill("熟能生巧","出牌阶段，你可以消耗1.0心情值，对场上任意一名玩家使用，使其下回合通过【学习牌】获得的熟练度+1",false));
@@ -61,7 +61,16 @@ public class Game {
         skills=new ArrayList<>();
         skills.add(new Skill("醉生梦死","出牌阶段，你可以丢弃一定数量的牌，根据丢弃的牌的数量决定接下来效果发生的次数：使你下一位玩家的心情值减少0.3，如果还丢弃有牌，则使该角色的往后第二位玩家心情值增加0.6，如果还丢弃有牌，则是该角色的往后第三位玩家心情值降低0.9，以此类推。每回合限一次",false));
         this.roles.add(new Role("覃思宁",1,3,1,2,1,1,1,
-                "生而活","在你的最后一个回合结束时，你至少有两个项目熟练度达到C及以上",5.0,skills));
+                "生而活","至少有两个项目熟练度达到C及以上",5.0,skills));
+        skills=new ArrayList<>();
+        skills.add(new Skill("容光焕发","摸牌阶段，如果你的心情值高于全场的平均值，你本回合的抽牌数+1",true));
+        skills.add(new Skill("失意","出牌阶段，你可以丢弃两张牌，对场上任意一名玩家使用，使其下回合通过【学习牌】获得的心情值减少1.0",false));
+        this.roles.add(new Role("王文捷",1,2,2,1,3,2,2,
+                "兼济天下","在你的最后一个回合结束时，你的心情值为全场最高并且所有人的平均心情值不低于12",8.0,skills));
+        skills=new ArrayList<>();
+        skills.add(new Skill("锋芒毕露","当你学习成功时，使场上除你以外的所有男性角色降低0.3心情值",true));
+        this.roles.add(new Role("韦承洋",1,3,1,2,2,0,1,
+                "随心所欲","累计打出40张牌",5.0,skills));
     }
 
     public void cardInit () {
