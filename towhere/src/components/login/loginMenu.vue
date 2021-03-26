@@ -59,6 +59,7 @@ export default {
       if (this.checkInput()) {
         const account = this.account
         const password = this.password
+        axios.defaults.withCredentials = true
         axios
           .post(this.$store.state.HTTPBaseURL + '/account/login/', { account, password })
           .then(resp => {

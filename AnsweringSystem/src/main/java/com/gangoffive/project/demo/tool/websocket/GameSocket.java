@@ -71,10 +71,16 @@ public class GameSocket {
             totalScore=0;
 
             //名品分值
+            totalScore+=(int)(e.getTreasures().size()*10);
             e.setTreasureScore(totalScore);
             totalScore=0;
 
-            e.setTotalScore(e.getProjectScore()+e.getMoodScore()+e.getCardScore()+e.getTreasureScore());
+            //财力值分值
+            totalScore+=(int)(e.getFinance()*2);
+            e.setFinanceScore(totalScore);
+            totalScore=0;
+
+            e.setTotalScore(e.getProjectScore()+e.getMoodScore()+e.getCardScore()+e.getTreasureScore()+e.getFinanceScore());
         }
     }
 
@@ -370,13 +376,36 @@ public class GameSocket {
         sendText(game.selectPlayerById(id).getRole().getName()+ "使用了[" + name + "]，对应的能力上升了");
     }
 
-    public void useSkill (int id1,int id2,String name,List<Card> cards) throws IOException {
+    public void useSkill (int id1,int id2,String name,List<Integer> indexs) throws IOException {
         Player player1=game.selectPlayerById(id1);
         Player player2=game.selectPlayerById(id2);
+        indexs.sort(Collections.reverseOrder());
         switch (name) {
             case "熟能生巧":player1.setMood(player1.getMood()-1.0);
-                        addBuff(player2,"熟练","下回合通过【学习牌】获得的熟练度+1",1,true);
+                        addBuff(player2,"熟练","通过【学习牌】获得的熟练度+1",1,true);
                         sendText(player1.getRole().getName()+"使用了‘熟能生巧’为"+player2.getRole().getName()+"添加了buff");
+                        break;
+            case "失意":
+                        for (Integer e:indexs) {
+                            game.getUsedCards().add(player1.getCards().get(e));
+                            player1.getCards().remove(player1.getCards().get(e));
+                        }
+                        addBuff(player2,"失意","通过【学习牌】获得的心情值减少1.0",1,false);
+                        sendText(player1.getRole().getName()+"使用了‘失意’为"+player2.getRole().getName()+"添加了buff");
+                        break;
+            case "重整旗鼓":for (Integer e:indexs) {
+                            game.getUsedCards().add(player1.getCards().get(e));
+                            player1.getCards().remove(player1.getCards().get(e));
+                        }
+                        Iterator<Buff> iterator = player2.getBuffs().iterator();
+                        while (iterator.hasNext()) {
+                            Buff a = iterator.next();
+                            if (!a.isBeneficial()) {
+                                iterator.remove();//使用迭代器的删除方法删除
+                            }
+                        }
+                        drawCard(player2);
+                        sendText(player1.getRole().getName()+"使用了‘重整旗鼓’清除了"+player2.getRole().getName()+"的异常状态");
                         break;
             default:break;
         }
@@ -448,7 +477,7 @@ public class GameSocket {
             case "名品牌":treasureCard(jsonObject.getInt("id"),jsonObject.getString("name"));break;
             case "计策牌":trickCard(jsonObject.getInt("id"),jsonObject.getInt("id2"),jsonObject.getString("name"));break;
             case "机缘牌":luckyCard(jsonObject.getInt("id"),jsonObject.getString("name"));break;
-            case "Skill":useSkill(jsonObject.getInt("id"),jsonObject.getInt("id2"),jsonObject.getString("name"),JSONArray.toList(jsonObject.getJSONArray("cards"),Card.class));break;
+            case "Skill":useSkill(jsonObject.getInt("id"),jsonObject.getInt("id2"),jsonObject.getString("name"),JSONArray.toList(jsonObject.getJSONArray("cards"),Integer.class));break;
             case "turnOverStage":turnOverStage(jsonObject.getInt("id"));break;
             default:sendMessage(message);break;
         }

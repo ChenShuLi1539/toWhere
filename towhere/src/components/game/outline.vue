@@ -1,7 +1,7 @@
 <template>
 <div>
     <el-container class="gameOutline" v-if="selected==='gameRoom'">
-    <el-header height='30px' class="header"></el-header>
+    <el-header height='30px' class="header"><el-button @click="cantTurnoverBug()">回合结束卡住了点此处</el-button></el-header>
     <el-main class="mainArea">
         <div class="gametable">
             <div class="chooseRoleArea" v-show="choosingRole">
@@ -45,10 +45,15 @@
                 <div class="playerMessage-2players" @click="chooseThisPlayer((parseInt(myIndex)+1)%players.length)" v-bind:class="{haveBeenSelectedRole: chosenPlayerId === players[(parseInt(myIndex)+1)%players.length].id}">
                   <div class="playerMessage-header">
                       <div class="playerMessage-header-left">{{players[(parseInt(myIndex)+1)%players.length].name}}</div>
+                      <div class="playerMessage-header-mid">¥×{{players[(parseInt(myIndex)+1)%players.length].finance}}</div>
                       <div class="playerMessage-header-right">❤×{{players[(parseInt(myIndex)+1)%players.length].mood}}</div>
                   </div>
                   <div class="playerMessage-role">{{players[(parseInt(myIndex)+1)%players.length].role.name}}</div>
-                  <div class="playerMessage-buff"></div>
+                  <div class="playerMessage-buff">
+                    <el-tooltip class="item" effect="dark" :content="players[(parseInt(myIndex)+1)%players.length].buffs[index].description" placement="top-start"  v-for="(each,index) in players[(parseInt(myIndex)+1)%players.length].buffs" v-bind:key="index">
+                      <div class="playerMessage-buff-buff">{{players[(parseInt(myIndex)+1)%players.length].buffs[index].name}}({{players[(parseInt(myIndex)+1)%players.length].buffs[index].lastTurns}})</div>
+                    </el-tooltip>
+                  </div>
                 </div>
               </el-tooltip>
 
@@ -72,15 +77,18 @@
                       已制作的名品：<div   v-for="(each,index5) in players[index0].treasures" v-bind:key="index5" style="margin-right:5px">{{players[index0].treasures[index5].name}}</div>
                     </div>
                   </div>
-                <div class="playerMessage"  @click="chooseThisPlayer(index0)" v-bind:class="{haveBeenSelectedRole: chosenPlayerId === players[index0].id}">
-                  <div v-if="index0!==myindex0&&index0!==parseInt(myindex0+1)%players.length&&index0!==parseInt(myindex0-1)%players.length">
+                <div class="playerMessage-top"  @click="chooseThisPlayer(index0)" v-bind:class="{haveBeenSelectedRole: chosenPlayerId === players[index0].id}" v-if="index0!==parseInt(myIndex)&&index0!==(parseInt(myIndex)+1)%players.length&&index0!==(parseInt(myIndex)-1+players.length)%players.length">
                     <div class="playerMessage-header">
                       <div class="playerMessage-header-left">{{players[index0].name}}</div>
+                      <div class="playerMessage-header-mid">¥×{{players[index0].finance}}</div>
                       <div class="playerMessage-header-right">❤×{{players[index0].mood}}</div>
                     </div>
                     <div class="playerMessage-role">{{players[index0].role.name}}</div>
-                    <div class="playerMessage-buff"></div>
-                  </div>
+                    <div class="playerMessage-buff">
+                      <el-tooltip class="item" effect="dark" :content="players[index0].buffs[index].description" placement="top-start"  v-for="(each,index) in players[index0].buffs" v-bind:key="index">
+                        <div class="playerMessage-buff-buff">{{players[index0].buffs[index].name}}({{players[index0].buffs[index].lastTurns}})</div>
+                      </el-tooltip>
+                    </div>
                 </div>
               </el-tooltip>
             </div>
@@ -105,42 +113,52 @@
                       已制作的名品：<div   v-for="(each,index5) in players[(parseInt(myIndex)+1)%players.length].treasures" v-bind:key="index5" style="margin-right:5px">{{players[(parseInt(myIndex)+1)%players.length].treasures[index5].name}}</div>
                     </div>
                   </div>
-                <div class="playerMessage-morePlayers-mid-left"  @click="chooseThisPlayer((parseInt(myIndex)+1))%players.length" v-bind:class="{haveBeenSelectedRole: chosenPlayerId === players[(parseInt(myIndex)+1)%players.length].id}">
+                <div class="playerMessage-morePlayers-mid-left"  @click="chooseThisPlayer((parseInt(myIndex)+1)%players.length)" v-bind:class="{haveBeenSelectedRole: chosenPlayerId === players[(parseInt(myIndex)+1)%players.length].id}">
                     <div class="playerMessage-header">
                       <div class="playerMessage-header-left">{{players[(parseInt(myIndex)+1)%players.length].name}}</div>
+                      <div class="playerMessage-header-mid">¥×{{players[(parseInt(myIndex)+1)%players.length].finance}}</div>
                       <div class="playerMessage-header-right">❤×{{players[(parseInt(myIndex)+1)%players.length].mood}}</div>
                     </div>
                     <div class="playerMessage-role">{{players[(parseInt(myIndex)+1)%players.length].role.name}}</div>
-                    <div class="playerMessage-buff"></div>
+                    <div class="playerMessage-buff">
+                      <el-tooltip class="item" effect="dark" :content="players[(parseInt(myIndex)+1)%players.length].buffs[index].description" placement="top-start"  v-for="(each,index) in players[(parseInt(myIndex)+1)%players.length].buffs" v-bind:key="index">
+                        <div class="playerMessage-buff-buff">{{players[(parseInt(myIndex)+1)%players.length].buffs[index].name}}({{players[(parseInt(myIndex)+1)%players.length].buffs[index].lastTurns}})</div>
+                      </el-tooltip>
+                    </div>
                 </div>
               </el-tooltip>
 
               <el-tooltip placement="top">
-                  <div slot="content"><strong>{{players[(parseInt(myIndex)-1)%players.length].role.name}}    性别：</strong><strong v-if="players[(parseInt(myIndex)-1)%players.length].role.sex === 0">女</strong><strong v-if="players[(parseInt(myIndex)-1)%players.length].role.sex === 1">男</strong>
-                    <div style="display:flex">天性：<div v-for="(each,index) in players[(parseInt(myIndex)-1)%players.length].role.natures" v-bind:key="index" style="margin-right:5px">{{players[(parseInt(myIndex)-1)%players.length].role.natures[index].name}}：{{players[(parseInt(myIndex)-1)%players.length].role.natures[index].level}}  </div></div>
-                    <div>人生目标-{{players[(parseInt(myIndex)-1)%players.length].role.target.name}}：{{players[(parseInt(myIndex)-1)%players.length].role.target.description}}</div>
-                    <div  v-for="(each,index2) in players[(parseInt(myIndex)-1)%players.length].bigProjects" v-bind:key="index2" style="display:flex">
-                      {{players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].name}}：
-                      <div  v-for="(each,index3) in players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects" v-bind:key="index3" style="display:flex;margin-right:5px">
-                        {{players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].name}}
-                        (<strong v-if="players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].mastery < 10">F</strong><strong v-if="players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].mastery>=10&&players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].mastery<17">E</strong><strong v-if="players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].mastery>=17&&players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].mastery<25">D</strong><strong v-if="players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].mastery>=25&&players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].mastery<35">C</strong><strong v-if="players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].mastery>=35&&players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].mastery<45">B</strong><strong v-if="players[(parseInt(myIndex)-1)%players.length].bigProjects[index2].smallProjects[index3].mastery>=45">A</strong>)
+                  <div slot="content"><strong>{{players[(parseInt(myIndex)-1+players.length)%players.length].role.name}}    性别：</strong><strong v-if="players[(parseInt(myIndex)-1+players.length)%players.length].role.sex === 0">女</strong><strong v-if="players[(parseInt(myIndex)-1+players.length)%players.length].role.sex === 1">男</strong>
+                    <div style="display:flex">天性：<div v-for="(each,index) in players[(parseInt(myIndex)-1+players.length)%players.length].role.natures" v-bind:key="index" style="margin-right:5px">{{players[(parseInt(myIndex)-1+players.length)%players.length].role.natures[index].name}}：{{players[(parseInt(myIndex)-1+players.length)%players.length].role.natures[index].level}}  </div></div>
+                    <div>人生目标-{{players[(parseInt(myIndex)-1+players.length)%players.length].role.target.name}}：{{players[(parseInt(myIndex)-1+players.length)%players.length].role.target.description}}</div>
+                    <div  v-for="(each,index2) in players[(parseInt(myIndex)-1+players.length)%players.length].bigProjects" v-bind:key="index2" style="display:flex">
+                      {{players[(parseInt(myIndex)-1+players.length)%players.length].bigProjects[index2].name}}：
+                      <div  v-for="(each,index3) in players[(parseInt(myIndex)-1+players.length)%players.length].bigProjects[index2].smallProjects" v-bind:key="index3" style="display:flex;margin-right:5px">
+                        {{players[(parseInt(myIndex)-1+players.length)%players.length].bigProjects[index2].smallProjects[index3].name}}
+                        (<strong v-if="players[(parseInt(myIndex)-1+players.length)%players.length].bigProjects[index2].smallProjects[index3].mastery < 10">F</strong><strong v-if="players[(parseInt(myIndex)-1+players.length)%players.length].bigProjects[index2].smallProjects[index3].mastery>=10&&players[(parseInt(myIndex)-1+players.length)%players.length].bigProjects[index2].smallProjects[index3].mastery<17">E</strong><strong v-if="players[(parseInt(myIndex)-1+players.length)%players.length].bigProjects[index2].smallProjects[index3].mastery>=17&&players[(parseInt(myIndex)-1+players.length)%players.length].bigProjects[index2].smallProjects[index3].mastery<25">D</strong><strong v-if="players[(parseInt(myIndex)-1+players.length)%players.length].bigProjects[index2].smallProjects[index3].mastery>=25&&players[(parseInt(myIndex)-1+players.length)%players.length].bigProjects[index2].smallProjects[index3].mastery<35">C</strong><strong v-if="players[(parseInt(myIndex)-1+players.length)%players.length].bigProjects[index2].smallProjects[index3].mastery>=35&&players[(parseInt(myIndex)-1+players.length)%players.length].bigProjects[index2].smallProjects[index3].mastery<45">B</strong><strong v-if="players[(parseInt(myIndex)-1+players.length)%players.length].bigProjects[index2].smallProjects[index3].mastery>=45">A</strong>)
                       </div>
                     </div>
                     <div>技能：</div>
-                    <div   v-for="(each,index4) in players[(parseInt(myIndex)-1)%players.length].role.skills" v-bind:key="index4">
-                      {{players[(parseInt(myIndex)-1)%players.length].role.skills[index4].name}}：{{players[(parseInt(myIndex)-1)%players.length].role.skills[index4].description}}
+                    <div   v-for="(each,index4) in players[(parseInt(myIndex)-1+players.length)%players.length].role.skills" v-bind:key="index4">
+                      {{players[(parseInt(myIndex)-1+players.length)%players.length].role.skills[index4].name}}：{{players[(parseInt(myIndex)-1+players.length)%players.length].role.skills[index4].description}}
                     </div>
                     <div style="display:flex">
-                      已制作的名品：<div   v-for="(each,index5) in players[(parseInt(myIndex)-1)%players.length].treasures" v-bind:key="index5" style="margin-right:5px">{{players[(parseInt(myIndex)-1)%players.length].treasures[index5].name}}</div>
+                      已制作的名品：<div   v-for="(each,index5) in players[(parseInt(myIndex)-1+players.length)%players.length].treasures" v-bind:key="index5" style="margin-right:5px">{{players[(parseInt(myIndex)-1+players.length)%players.length].treasures[index5].name}}</div>
                     </div>
                   </div>
-                <div class="playerMessage-morePlayers-mid-right"  @click="chooseThisPlayer((parseInt(myIndex)-1)%players.length)" v-bind:class="{haveBeenSelectedRole: chosenPlayerId === players[(parseInt(myIndex)-1)%players.length].id}">
+                <div class="playerMessage-morePlayers-mid-right"  @click="chooseThisPlayer((parseInt(myIndex)-1+players.length)%players.length)" v-bind:class="{haveBeenSelectedRole: chosenPlayerId === players[(parseInt(myIndex)-1+players.length)%players.length].id}">
                     <div class="playerMessage-header">
-                      <div class="playerMessage-header-left">{{players[(parseInt(myIndex)-1)%players.length].name}}</div>
-                      <div class="playerMessage-header-right">❤×{{players[(parseInt(myIndex)-1)%players.length].mood}}</div>
+                      <div class="playerMessage-header-left">{{players[(parseInt(myIndex)-1+players.length)%players.length].name}}</div>
+                      <div class="playerMessage-header-mid">¥×{{players[(parseInt(myIndex)-1+players.length)%players.length].finance}}</div>
+                      <div class="playerMessage-header-right">❤×{{players[(parseInt(myIndex)-1+players.length)%players.length].mood}}</div>
                     </div>
-                    <div class="playerMessage-role">{{players[(parseInt(myIndex)-1)%players.length].role.name}}</div>
-                    <div class="playerMessage-buff"></div>
+                    <div class="playerMessage-role">{{players[(parseInt(myIndex)-1+players.length)%players.length].role.name}}</div>
+                    <div class="playerMessage-buff">
+                      <el-tooltip class="item" effect="dark" :content="players[(parseInt(myIndex)-1+players.length)%players.length].buffs[index].description" placement="top-start"  v-for="(each,index) in players[(parseInt(myIndex)-1+players.length)%players.length].buffs" v-bind:key="index">
+                        <div class="playerMessage-buff-buff">{{players[(parseInt(myIndex)-1+players.length)%players.length].buffs[index].name}}({{players[(parseInt(myIndex)-1+players.length)%players.length].buffs[index].lastTurns}})</div>
+                      </el-tooltip>
+                    </div>
                 </div>
               </el-tooltip>
             </div>
@@ -203,7 +221,9 @@
     </el-main>
     <el-footer height='200px' class="footer">
         <div class="buffArea" v-if="AllChosen">
-          <div class="buff" v-for="(each,index) in players[myIndex].buffs" v-bind:key="index">{{players[myIndex].buffs[index].name}}({{players[myIndex].buffs[index].lastTurns}})</div>
+          <el-tooltip class="item" effect="dark" :content="players[myIndex].buffs[index].description" placement="top-start"  v-for="(each,index) in players[myIndex].buffs" v-bind:key="index">
+            <div class="buff">{{players[myIndex].buffs[index].name}}({{players[myIndex].buffs[index].lastTurns}})</div>
+          </el-tooltip>
         </div>
         <div class="cardArea" v-if="AllChosen">
           <el-tooltip class="item" effect="dark" :content="players[myIndex].cards[index].description" placement="top-start"  v-for="(each,index) in players[myIndex].cards" v-bind:key="index">
@@ -236,6 +256,7 @@
           <div class="roleArea" @click="chooseThisPlayer(myIndex)">
             <div class="roleArea-header">
               <div class="roleArea-header-left">{{players[myIndex].name}}</div>
+              <div class="roleArea-header-mid">¥×{{this.players[this.myIndex].finance}}</div>
               <div class="roleArea-header-right">❤×{{this.players[this.myIndex].mood}}</div>
             </div>
             <div class="roleArea-mid">{{this.players[this.myIndex].role.name}}</div>
@@ -287,6 +308,10 @@
         <el-table-column
           prop="treasureScore"
           label="名品分数">
+        </el-table-column>
+        <el-table-column
+          prop="financeScore"
+          label="财力值分数">
         </el-table-column>
         <el-table-column
           prop="totalScore"
@@ -425,7 +450,6 @@ export default {
                   id: _self.players[(parseInt(_self.myIndex) + 1) % _self.players.length].id
                 }))
               }
-
               break
             case 'studySuccess':
               _self.$message.success(data.text)
@@ -651,7 +675,16 @@ export default {
               this.$message.error('你当前的心情值不足以发动此技能')
             }
             break
-
+          case '失意':
+            this.tips = '请选择一名角色及要丢弃的两张牌'
+            this.selectedSkill = true
+            this.chosenSkill = '失意'
+            break
+          case '重整旗鼓':
+            this.tips = '请选择一名角色及要丢弃的三张牌'
+            this.selectedSkill = true
+            this.chosenSkill = '重整旗鼓'
+            break
           default:
             break
         }
@@ -790,7 +823,24 @@ export default {
             canUse = false
           }
           break
-
+        case '失意':
+          if (this.chosenPlayerId < 1) {
+            this.$message.error('未选择正确的使用玩家')
+            canUse = false
+          } else if (this.selectedCards.length !== 2) {
+            this.$message.error('请选择两张牌')
+            canUse = false
+          }
+          break
+        case '重整旗鼓':
+          if (this.chosenPlayerId < 1) {
+            this.$message.error('未选择正确的使用玩家')
+            canUse = false
+          } else if (this.selectedCards.length !== 3) {
+            this.$message.error('请选择三张牌')
+            canUse = false
+          }
+          break
         default:
           break
       }
@@ -847,6 +897,12 @@ export default {
         this.socket.send(JSON.stringify(msg))
       }
       this.message = ''
+    },
+    cantTurnoverBug: function () {
+      this.socket.send(JSON.stringify({
+        type: 'turnStartStage',
+        id: this.players[(parseInt(this.myIndex) + 1) % this.players.length].id
+      }))
     }
   },
   mounted () {
@@ -916,25 +972,48 @@ export default {
 }
 .playerMessage-header-left {
     margin: 10px auto auto 10px;
+    font-size: 10px;
+}
+.playerMessage-header-mid {
+    margin: 10px auto;
+    color: #E6A23C;
 }
 .playerMessage-header-right {
     margin: 10px 10px auto auto;
     color: #FF2D2D;
 }
 .playerMessage-role {
-    line-height: 100px;
+    line-height: 90px;
     text-align: center;
     font-size: 26px;
     font-family: "Microsoft Yahei", sans-serif;
     letter-spacing: 0.032cm;
+}
+.playerMessage-buff {
+    width: 90%;
+    height: 30%;
+    display: flex;
+    margin: auto;
+}
+.playerMessage-buff-buff {
+    border:1px solid black;
+    border-radius: 1px;
+    width: 28%;
+    height: 45%;
+    margin: 10px auto auto 10px;
+    text-align: center;
+    font-size: 10px;
+    font-family: "Microsoft Yahei", sans-serif;
+    letter-spacing: 0.032cm;
+    border-radius: 5px;
 }
 .playerMessage-morePlayers-top {
     width: 1000px;
     height: 240px;
     display: flex;
 }
-.playerMessage {
-    margin: 10px auto;
+.playerMessage-top {
+    margin: 20px auto;
     height: 180px;
     width: 140px;
     border: 1px solid black;
@@ -963,7 +1042,9 @@ export default {
     height: 20px;
     width: 600px;
     display: flex;
-    margin: 0 auto 0 300px;
+    position: absolute;
+    left: 350px;
+    top: 350px;
     border: 1px solid black;
 }
 .willBeChosenProject {
@@ -979,7 +1060,9 @@ export default {
     height: 20px;
     width: 600px;
     display: flex;
-    margin: 10px auto 0 300px;
+    position: absolute;
+    left: 350px;
+    top: 400px;
     border: 1px solid black;
 }
 .willBeChosenLevel {
@@ -992,7 +1075,10 @@ export default {
    cursor: pointer;
 }
 .selectSkillTips {
-  margin: 20px auto 0 550px;
+  position: absolute;
+  width: 80%;
+  text-align: center;
+    top: 400px;
   color: #E6A23C;
   font-size: 26px;
   font-family: "Microsoft Yahei", sans-serif;
@@ -1006,7 +1092,9 @@ export default {
 }
 .buttonArea {
   width: 600px;
-  margin: 10px auto 0 300px;
+  position: absolute;
+    left: 350px;
+    top: 450px;
   display: flex;
 }
 .useCardButton-true {
@@ -1084,6 +1172,14 @@ export default {
 .buff {
   border:1px solid black;
   border-radius: 1px;
+  width: 28%;
+  height: 18%;
+  margin: 10px auto auto 10px;
+  text-align: center;
+  font-size: 18px;
+  font-family: "Microsoft Yahei", sans-serif;
+  letter-spacing: 0.032cm;
+  border-radius: 5px;
 }
 .cardArea {
     border: solid 1px yellow;
@@ -1123,6 +1219,10 @@ export default {
 }
 .roleArea-header-left {
     margin: 10px auto auto 10px;
+}
+.roleArea-header-mid {
+    margin: 10px auto;
+    color:#E6A23C;
 }
 .roleArea-header-right {
     margin: 10px 10px auto auto;
