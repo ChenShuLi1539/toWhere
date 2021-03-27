@@ -48,7 +48,7 @@
                       <div class="playerMessage-header-mid">¥×{{players[(parseInt(myIndex)+1)%players.length].finance}}</div>
                       <div class="playerMessage-header-right">❤×{{players[(parseInt(myIndex)+1)%players.length].mood}}</div>
                   </div>
-                  <div class="playerMessage-role">{{players[(parseInt(myIndex)+1)%players.length].role.name}}</div>
+                  <div class="playerMessage-role" :class="{redBackground:players[(parseInt(myIndex)+1)%players.length].redTeam,blueBackground:!this.players[(parseInt(myIndex)+1)%players.length].redTeam}">{{players[(parseInt(myIndex)+1)%players.length].role.name}}</div>
                   <div class="playerMessage-buff">
                     <el-tooltip class="item" effect="dark" :content="players[(parseInt(myIndex)+1)%players.length].buffs[index].description" placement="top-start"  v-for="(each,index) in players[(parseInt(myIndex)+1)%players.length].buffs" v-bind:key="index">
                       <div class="playerMessage-buff-buff">{{players[(parseInt(myIndex)+1)%players.length].buffs[index].name}}({{players[(parseInt(myIndex)+1)%players.length].buffs[index].lastTurns}})</div>
@@ -83,7 +83,7 @@
                       <div class="playerMessage-header-mid">¥×{{players[index0].finance}}</div>
                       <div class="playerMessage-header-right">❤×{{players[index0].mood}}</div>
                     </div>
-                    <div class="playerMessage-role">{{players[index0].role.name}}</div>
+                    <div class="playerMessage-role" :class="{redBackground:players[index0].redTeam,blueBackground:!this.players[index0].redTeam}">{{players[index0].role.name}}</div>
                     <div class="playerMessage-buff">
                       <el-tooltip class="item" effect="dark" :content="players[index0].buffs[index].description" placement="top-start"  v-for="(each,index) in players[index0].buffs" v-bind:key="index">
                         <div class="playerMessage-buff-buff">{{players[index0].buffs[index].name}}({{players[index0].buffs[index].lastTurns}})</div>
@@ -119,7 +119,7 @@
                       <div class="playerMessage-header-mid">¥×{{players[(parseInt(myIndex)+1)%players.length].finance}}</div>
                       <div class="playerMessage-header-right">❤×{{players[(parseInt(myIndex)+1)%players.length].mood}}</div>
                     </div>
-                    <div class="playerMessage-role">{{players[(parseInt(myIndex)+1)%players.length].role.name}}</div>
+                    <div class="playerMessage-role" :class="{redBackground:players[(parseInt(myIndex)+1)%players.length].redTeam,blueBackground:!this.players[(parseInt(myIndex)+1)%players.length].redTeam}">{{players[(parseInt(myIndex)+1)%players.length].role.name}}</div>
                     <div class="playerMessage-buff">
                       <el-tooltip class="item" effect="dark" :content="players[(parseInt(myIndex)+1)%players.length].buffs[index].description" placement="top-start"  v-for="(each,index) in players[(parseInt(myIndex)+1)%players.length].buffs" v-bind:key="index">
                         <div class="playerMessage-buff-buff">{{players[(parseInt(myIndex)+1)%players.length].buffs[index].name}}({{players[(parseInt(myIndex)+1)%players.length].buffs[index].lastTurns}})</div>
@@ -153,7 +153,7 @@
                       <div class="playerMessage-header-mid">¥×{{players[(parseInt(myIndex)-1+players.length)%players.length].finance}}</div>
                       <div class="playerMessage-header-right">❤×{{players[(parseInt(myIndex)-1+players.length)%players.length].mood}}</div>
                     </div>
-                    <div class="playerMessage-role">{{players[(parseInt(myIndex)-1+players.length)%players.length].role.name}}</div>
+                    <div class="playerMessage-role" :class="{redBackground:players[(parseInt(myIndex)-1+players.length)%players.length].redTeam,blueBackground:!this.players[(parseInt(myIndex)-1+players.length)%players.length].redTeam}">{{players[(parseInt(myIndex)-1+players.length)%players.length].role.name}}</div>
                     <div class="playerMessage-buff">
                       <el-tooltip class="item" effect="dark" :content="players[(parseInt(myIndex)-1+players.length)%players.length].buffs[index].description" placement="top-start"  v-for="(each,index) in players[(parseInt(myIndex)-1+players.length)%players.length].buffs" v-bind:key="index">
                         <div class="playerMessage-buff-buff">{{players[(parseInt(myIndex)-1+players.length)%players.length].buffs[index].name}}({{players[(parseInt(myIndex)-1+players.length)%players.length].buffs[index].lastTurns}})</div>
@@ -259,7 +259,8 @@
               <div class="roleArea-header-mid">¥×{{this.players[this.myIndex].finance}}</div>
               <div class="roleArea-header-right">❤×{{this.players[this.myIndex].mood}}</div>
             </div>
-            <div class="roleArea-mid">{{this.players[this.myIndex].role.name}}</div>
+            <div class="studyTimes">本回合剩余学习次数:{{this.players[this.myIndex].canStudyTimes}}</div>
+            <div class="roleArea-mid" :class="{redBackground:this.players[this.myIndex].redTeam,blueBackground:!this.players[this.myIndex].redTeam}">{{this.players[this.myIndex].role.name}}</div>
             <div class="roleArea-footer">
               <div class="roleArea-skill" v-for="(each,index) in players[myIndex].role.skills" v-bind:key="index">
                 <el-button class="skill" type="success" round v-if="!players[myIndex].role.skills[index].automatic" @click="choosingSkill(index)">{{players[myIndex].role.skills[index].name}}</el-button>
@@ -285,7 +286,8 @@
       <el-table
       :data="finalData"
       style="width: 60%;
-            margin: 50px auto">
+            margin: 50px auto"
+      :row-class-name="tableRowClassName">
         <el-table-column
           prop="role.name"
           label="角色"
@@ -318,6 +320,8 @@
           label="总分">
         </el-table-column>
       </el-table>
+      <div class="RedScore">红队得分：{{this.redScore}}</div>
+      <div class="BlueScore">蓝队得分：{{this.blueScore}}</div>
        <el-button type="primary" round class="restartButton" @click="restart()">再来一局</el-button>
     </div>
 </div>
@@ -368,6 +372,8 @@ export default {
       selectedCards: [],
       tips: '',
 
+      redScore: '',
+      blueScore: '',
       isGameover: false,
       finalData: []
     }
@@ -464,6 +470,10 @@ export default {
             case 'text':
               _self.received.push(data)
               _self.scrollToBottom()
+              break
+            case 'gameoverMessage':
+              _self.redScore = data.data1
+              _self.blueScore = data.data2
               break
             default:
               break
@@ -613,6 +623,15 @@ export default {
             case '潜心修学':
               if (this.players[this.myIndex].role.natures[5].level < 9) { canUse = false }
               break
+            case '投资':
+              if (this.players[this.myIndex].finance < 2) { canUse = false }
+              break
+            case '借贷':
+              if (this.players[this.myIndex].finance < 2) { canUse = false }
+              break
+            case '5毛零食':
+              if (this.players[this.myIndex].finance < 1) { canUse = false }
+              break
             case '制作独立音乐':
               if (this.players[this.myIndex].bigProjects[1].smallProjects[0].mastery < 25) { canUse = false }
               break
@@ -625,28 +644,32 @@ export default {
           if (canUse) {
             this.selectedCard = true
             if (this.players[this.myIndex].cards[index].type === 0) {
-              this.selectedStudyCard = true
-              switch (this.players[this.myIndex].cards[index].name) {
-                case '学习体育':
-                  this.selectedProject = ['球类', '田径', '水上项目', '武术']
-                  break
-                case '学习音乐':
-                  this.selectedProject = ['乐器', '声乐']
-                  break
-                case '学习文学':
-                  this.selectedProject = ['小说', '散文', '报道']
-                  break
-                case '学习美术':
-                  this.selectedProject = ['绘画', '服饰', '建筑']
-                  break
-                case '学习自然':
-                  this.selectedProject = ['动物培育', '园艺', '天文', '地理']
-                  break
-                case '学习生活':
-                  this.selectedProject = ['八卦', '手工', '厨艺', '游戏']
-                  break
-                default:
-                  break
+              if (this.players[this.myIndex].canStudyTimes > 0) {
+                this.selectedStudyCard = true
+                switch (this.players[this.myIndex].cards[index].name) {
+                  case '学习体育':
+                    this.selectedProject = ['球类', '田径', '水上项目', '武术']
+                    break
+                  case '学习音乐':
+                    this.selectedProject = ['乐器', '声乐']
+                    break
+                  case '学习文学':
+                    this.selectedProject = ['小说', '散文', '报道']
+                    break
+                  case '学习美术':
+                    this.selectedProject = ['绘画', '服饰', '建筑']
+                    break
+                  case '学习自然':
+                    this.selectedProject = ['动物培育', '园艺', '天文', '地理']
+                    break
+                  case '学习生活':
+                    this.selectedProject = ['八卦', '手工', '厨艺', '游戏']
+                    break
+                  default:
+                    break
+                }
+              } else {
+                this.$message.error('你本回合的学习次数已用尽')
               }
             }
           } else {
@@ -664,29 +687,74 @@ export default {
     },
     choosingSkill: function (index) {
       if (this.isturnStart) {
-        this.clearUseButton()
-        switch (this.players[this.myIndex].role.skills[index].name) {
-          case '熟能生巧':
-            if (this.players[this.myIndex].mood > 1.0) {
-              this.tips = '请选择一名角色'
+        if (!this.haveThisBuff('失心')) {
+          this.clearUseButton()
+          switch (this.players[this.myIndex].role.skills[index].name) {
+            case '熟能生巧':
+              if (this.players[this.myIndex].mood > 1.0) {
+                this.tips = '请选择一名角色'
+                this.selectedSkill = true
+                this.chosenSkill = '熟能生巧'
+              } else {
+                this.$message.error('你当前的心情值不足以发动此技能')
+              }
+              break
+            case '失意':
+              this.tips = '请选择一名角色及要丢弃的两张牌'
               this.selectedSkill = true
-              this.chosenSkill = '熟能生巧'
-            } else {
-              this.$message.error('你当前的心情值不足以发动此技能')
-            }
-            break
-          case '失意':
-            this.tips = '请选择一名角色及要丢弃的两张牌'
-            this.selectedSkill = true
-            this.chosenSkill = '失意'
-            break
-          case '重整旗鼓':
-            this.tips = '请选择一名角色及要丢弃的三张牌'
-            this.selectedSkill = true
-            this.chosenSkill = '重整旗鼓'
-            break
-          default:
-            break
+              this.chosenSkill = '失意'
+              break
+            case '重整旗鼓':
+              this.tips = '请选择一名角色及要丢弃的三张牌'
+              this.selectedSkill = true
+              this.chosenSkill = '重整旗鼓'
+              break
+            case '珍视':
+              if (this.players[this.myIndex].role.collectionUse) {
+                this.tips = '请选择要收藏的一张牌'
+                this.selectedSkill = true
+                this.chosenSkill = '珍视'
+              } else {
+                this.$message.error('你本回合已无法再使用此技能')
+              }
+              break
+            case '回忆':
+              if (this.players[this.myIndex].mood > 3.0) {
+                this.tips = '确定要使用“回忆”吗'
+                this.selectedSkill = true
+                this.chosenSkill = '回忆'
+              } else {
+                this.$message.error('你当前的心情值不足以发动此技能')
+              }
+              break
+            case '失心':
+              this.tips = '请选择一名角色及要丢弃的一张牌'
+              this.selectedSkill = true
+              this.chosenSkill = '失心'
+              break
+            case '紧急救援':
+              if (this.players[this.myIndex].finance > 0) {
+                this.tips = '请选择一名角色'
+                this.selectedSkill = true
+                this.chosenSkill = '紧急救援'
+              } else {
+                this.$message.error('你当前的财力值不足以发动此技能')
+              }
+              break
+            case '炉边聚会':
+              if (this.players[this.myIndex].finance > 2) {
+                this.tips = '确定要使用“炉边聚会”吗'
+                this.selectedSkill = true
+                this.chosenSkill = '炉边聚会'
+              } else {
+                this.$message.error('你当前的财力值不足以发动此技能')
+              }
+              break
+            default:
+              break
+          }
+        } else {
+          this.$message.error('你已被“失心”封印，无法使用技能')
         }
       } else {
         this.$message.error('现在还不是你的回合')
@@ -756,7 +824,7 @@ export default {
         }
       }
       if (this.players[this.myIndex].cards[this.chosenCard].type === 3) {
-        if (this.players[this.myIndex].cards[this.chosenCard].name === '共渡难关' || this.players[this.myIndex].cards[this.chosenCard].name === '赠人玫瑰') {
+        if (this.players[this.myIndex].cards[this.chosenCard].name === '共渡难关' || this.players[this.myIndex].cards[this.chosenCard].name === '赠人玫瑰' || this.players[this.myIndex].cards[this.chosenCard].name === '借贷') {
           if (this.chosenPlayerId === 0) {
             canUse = false
             this.$message.error('未选择正确的使用玩家')
@@ -765,7 +833,7 @@ export default {
             canUse = false
             this.$message.error('不能指定自己为目标')
           }
-        } else if (this.players[this.myIndex].cards[this.chosenCard].name === '无独有偶' || this.players[this.myIndex].cards[this.chosenCard].name === '底力爆发' || this.players[this.myIndex].cards[this.chosenCard].name === '潜心修学') {
+        } else if (this.players[this.myIndex].cards[this.chosenCard].name === '无独有偶' || this.players[this.myIndex].cards[this.chosenCard].name === '底力爆发' || this.players[this.myIndex].cards[this.chosenCard].name === '潜心修学' || this.players[this.myIndex].cards[this.chosenCard].name === '投资' || this.players[this.myIndex].cards[this.chosenCard].name === '5毛零食') {
 
         } else {
           if (this.chosenPlayerId === 0) {
@@ -841,6 +909,27 @@ export default {
             canUse = false
           }
           break
+        case '珍视':
+          if (this.selectedCards.length !== 1) {
+            this.$message.error('请选择一张牌')
+            canUse = false
+          }
+          break
+        case '失心':
+          if (this.chosenPlayerId < 1) {
+            this.$message.error('未选择正确的使用玩家')
+            canUse = false
+          } else if (this.selectedCards.length !== 1) {
+            this.$message.error('请选择一张牌')
+            canUse = false
+          }
+          break
+        case '紧急救援':
+          if (this.chosenPlayerId < 1) {
+            this.$message.error('未选择正确的使用玩家')
+            canUse = false
+          }
+          break
         default:
           break
       }
@@ -903,6 +992,21 @@ export default {
         type: 'turnStartStage',
         id: this.players[(parseInt(this.myIndex) + 1) % this.players.length].id
       }))
+    },
+    tableRowClassName ({ row, rowIndex }) {
+      if (this.finalData[rowIndex].redTeam) {
+        return 'success-row'
+      } else {
+        return 'warning-row'
+      }
+    },
+    haveThisBuff (name) {
+      for (const each in this.players[this.myIndex].buffs) {
+        if (this.players[this.myIndex].buffs[each].name === name) {
+          return true
+        }
+      }
+      return false
     }
   },
   mounted () {
@@ -1228,12 +1332,21 @@ export default {
     margin: 10px 10px auto auto;
     color: #FF2D2D;
 }
+.studyTimes {
+  font-size: 10px;
+}
 .roleArea-mid {
     line-height: 120px;
     text-align: center;
     font-size: 26px;
     font-family: "Microsoft Yahei", sans-serif;
     letter-spacing: 0.032cm;
+}
+.redBackground {
+  background-color: rgba(238, 38, 38, 0.603);
+}
+.blueBackground {
+  background-color: rgba(51, 81, 212, 0.795);
 }
 .roleArea-footer {
   height: 20px;
@@ -1274,7 +1387,24 @@ export default {
     height: 730px;
     background-color: rgba(255 ,255,255, 0.9);
 }
+.el-table .warning-row {
+    background: rgba(51, 81, 212, 0.795);
+  }
+
+  .el-table .success-row {
+    background:  rgba(238, 38, 38, 0.603);
+  }
+.RedScore {
+  text-align: center;
+  background-color: rgba(238, 38, 38, 0.603);
+  font-size: 26px;
+}
+.BlueScore {
+  text-align: center;
+  background-color: rgba(51, 81, 212, 0.795);
+  font-size: 26px;
+}
 .restartButton {
-  margin: 20px auto auto 600px;
+  margin: 20px auto auto 45%;
 }
 </style>
