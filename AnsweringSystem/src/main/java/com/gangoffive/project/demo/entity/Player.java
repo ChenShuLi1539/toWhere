@@ -23,6 +23,8 @@ public class Player {
     private int cardScore=0;
     private int treasureScore=0;
     private int financeScore=0;
+    private boolean isRedTeam;
+    private int canStudyTimes=3;
 
     public Player (String name,int id) {
         this.name=name;

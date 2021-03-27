@@ -15,6 +15,8 @@ public class Game {
     private int playerNum;
     private int chosenNum=0;
     private int year=0;//0表示小学四年级，之后每+1表示增加一年
+    private int redTeamScore=0;
+    private int blueTeamScore=0;
 
     public Game () {
         roleInit();
@@ -34,8 +36,8 @@ public class Game {
         this.roles.add(new Role("兰文俊",1,3,3,3,0,3,2,
                 "武术大师","体育-武术熟练度达到A",5.0,skills));
         skills=new ArrayList<>();
-        skills.add(new Skill("珍视","弃牌阶段，你可以选择你将要丢弃的牌中的一张牌进行收藏",true));
-        skills.add(new Skill("回忆","出牌阶段，取出你收藏的所有牌",false));
+        skills.add(new Skill("珍视","出牌阶段，你可以选择一张牌进行收藏，每回合限一次",false));
+        skills.add(new Skill("回忆","出牌阶段，消耗3.0心情值，使你本回合的所有天性临时+1，并取出你收藏的所有牌",false));
         this.roles.add(new Role("吴童",1,2,3,3,2,0,1,
                 "世界和平","在你的最后一个回合结束时场上没有人因为心情值降为0而出局",5.0,skills));
         skills=new ArrayList<>();
@@ -70,7 +72,26 @@ public class Game {
         skills=new ArrayList<>();
         skills.add(new Skill("锋芒毕露","当你学习成功时，使场上除你以外的所有男性角色降低0.3心情值",true));
         this.roles.add(new Role("韦承洋",1,3,1,2,2,0,1,
+                "发大财","财力值达到15",5.0,skills));
+        skills=new ArrayList<>();
+        skills.add(new Skill("失心","出牌阶段，你可以丢弃一张牌，对场上任意一名玩家使用，有你的顽皮/(对方勇敢+你的顽皮)%概率使其下一回合在出牌阶段无法使用技能",false));
+        this.roles.add(new Role("庞卓凡",0,3,3,3,2,1,0,
                 "随心所欲","累计打出40张牌",5.0,skills));
+        skills=new ArrayList<>();
+        skills.add(new Skill("钱庄","游戏开始时，你拥有5点财力值",true));
+        skills.add(new Skill("紧急救援","出牌阶段，消耗1点财力值，对场上任意一名玩家使用，使其下回合的抽牌数+1",false));
+        skills.add(new Skill("炉边聚会","出牌阶段，消耗3点财力值，使我方全体下回合学习成功时获得的心情值+0.5",false));
+        this.roles.add(new Role("许悦",0,1,3,2,2,1,1,
+                "永远开心","心情值达到20及以上",5.0,skills));
+        skills=new ArrayList<>();
+        skills.add(new Skill("博闻强识","当你学习失败时，你本回合通过【学习牌】获得的熟练度+1",true));
+        skills.add(new Skill("孜孜不倦","你每个回合可学习的次数+1",true));
+        this.roles.add(new Role("李浪",1,3,1,3,3,2,2,
+                "实现梦想","制造出一件名品",5.0,skills));
+        skills=new ArrayList<>();
+        skills.add(new Skill("降智打击","回合开始时，如果你的心情值低于全场的平均值，那么抽牌阶段，你的抽牌数+2，但是心情值-2.0",true));
+        this.roles.add(new Role("李昱辰",1,1,1,3,2,2,1,
+                "发大财","财力值达到15",5.0,skills));
     }
 
     public void cardInit () {
@@ -100,6 +121,9 @@ public class Game {
             cards.add(new Card("赠人玫瑰",3,"需要玩家的细腻天性>7才能使用。对场上除你之外一名玩家使用，将你当前的手牌转移给对方，每转移一张牌，你的心情值增加0.5。"));
             cards.add(new Card("留一手",3,"需要玩家的谨慎天性>3才能使用。对场上一名玩家使用，使其下回合学习失败时获得的期待值增加0.5。"));
             cards.add(new Card("潜心修学",3,"需要玩家的谨慎天性>8才能使用。你的谨慎天性每比顽皮天性高出1点，抽一张牌。"));
+            cards.add(new Card("投资",3,"消耗2点财力值，有你的聪颖/（全场勇敢平均值+全场聪颖平均值）%概率获得5点财力值。"));
+            cards.add(new Card("借贷",3,"消耗2点财力值，使场上除你以外的一名玩家财力值+2。"));
+            cards.add(new Card("5毛零食",3,"消耗1点财力值，你的心情值+1.0。"));
         }
         for (int i=0;i<1;i++) {
             cards.add(new Card("提升聪颖",4,"聪颖+1。"));
@@ -109,6 +133,7 @@ public class Game {
             cards.add(new Card("提升坚韧",4,"坚韧+1。"));
             cards.add(new Card("提升谨慎",4,"谨慎+1。"));
             cards.add(new Card("提升兴趣",4,"使随机一个兴趣上升一层。"));
+            cards.add(new Card("飞来横财",4,"财力值+2。"));
         }
         Collections.shuffle(cards);
     }
@@ -350,6 +375,8 @@ public class Game {
         }
         if(haveThisBuff(player,"愉悦"))
             player.setMood(player.getMood()+0.3);
+        if(haveThisBuff(player,"聚会余兴"))
+            player.setMood(player.getMood()+0.5);
         //后计算熟练度
         caculateMasteryUp(player,smallProject,level);
     }

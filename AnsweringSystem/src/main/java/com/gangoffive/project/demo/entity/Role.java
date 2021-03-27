@@ -13,8 +13,8 @@ public class Role {
     private List<Nature> natures;
     private Target target;
     private List<Skill> skills;
-    private Boolean bestFriend=false;//徐东东技能的绑定关系
-    private int bestFriendLevel=0;//徐东东技能的关系值
+    private List<Card> collectionCards=new ArrayList<>();//吴童技能收藏的卡牌
+    private boolean collectionUse=true;//吴童技能的使用
 
     public Role (String name,int sex,int nature1,int nature2,int nature3,int nature4,int nature5,int nature6,String targetName,
                  String targetDescription,Double targetprofit,List<Skill> skills) {

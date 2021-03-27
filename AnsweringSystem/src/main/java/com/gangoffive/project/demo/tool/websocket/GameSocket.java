@@ -33,11 +33,50 @@ public class GameSocket {
 
     }
 
+    public void gameStart() throws IOException {
+        for (Player player:game.getPlayers()) {
+            if (haveThisSkill(player,"勇壮")) {
+                player.getRole().getNatures().get(1).setLevel(player.getRole().getNatures().get(1).getLevel()+2);
+                player.getRole().getNatures().get(4).setLevel(player.getRole().getNatures().get(4).getLevel()+1);
+                sendText(player.getRole().getName()+"发动技能增加了勇敢和坚韧");
+            }
+            if(haveThisSkill(player,"钱庄")) {
+                player.setFinance(5);
+                sendText(player.getRole().getName()+"发动技能获得了5点财力值");
+            }
+        }
+    }
+
+    public void randomTeam() {
+        int RedCount=0;
+        int BlueCount=0;
+        for (Player player:game.getPlayers()) {
+            int i= (int) (Math.random() * 2);
+            if(i==0) {
+                if(RedCount*2>=game.getPlayers().size()){
+                    player.setRedTeam(false);
+                    BlueCount++;
+                }else {
+                    player.setRedTeam(true);
+                    RedCount++;
+                }
+            }else {
+                if(BlueCount*2>=game.getPlayers().size()){
+                    player.setRedTeam(true);
+                    RedCount++;
+                }else {
+                    player.setRedTeam(false);
+                    BlueCount++;
+                }
+            }
+        }
+    }
+
     public void  accident () {
 
     }
 
-    public void caculateTolatScore () {
+    public void caculateTolatScore () throws IOException {
         for (Player e:game.getPlayers()) {
             int totalScore=0;
 
@@ -81,6 +120,17 @@ public class GameSocket {
             totalScore=0;
 
             e.setTotalScore(e.getProjectScore()+e.getMoodScore()+e.getCardScore()+e.getTreasureScore()+e.getFinanceScore());
+            if(e.isRedTeam()) {
+                game.setRedTeamScore(game.getRedTeamScore()+e.getTotalScore());
+            }else {
+                game.setBlueTeamScore(game.getBlueTeamScore()+e.getTotalScore());
+            }
+            Map<String,String> map1=new HashMap<>();
+            map1.put("type","gameoverMessage");
+            map1.put("data1",game.getRedTeamScore()+"");
+            map1.put("data2",game.getBlueTeamScore()+"");
+            JSONObject jsonObject=JSONObject.fromObject(map1);
+            sendMessage(jsonObject.toString());
         }
     }
 
@@ -91,6 +141,14 @@ public class GameSocket {
             Player s2=(Player) b;
             return s2.getTotalScore() - s1.getTotalScore();
         }
+    }
+
+    public int caculateStudyTimes(Player player) {
+        int times = 3;
+        if (haveThisSkill(player,"孜孜不倦")) {
+            times++;
+        }
+        return times;
     }
 
     public void turnStartStage (int id) throws IOException {
@@ -135,6 +193,11 @@ public class GameSocket {
                 player.setMood(player.getMood()+0.5);
                 sendText(player.getRole().getName()+"发动‘再生力’提高了自己的心情值");
             }
+            player.setCanStudyTimes(caculateStudyTimes(player));
+            //影响学习次数的技能和buff
+
+            player.setFinance(player.getFinance()+1);
+
             sendAllPlayerMessage();
             //向前端询问这个人物是否有主动技能
              Map<String,String> map1=new HashMap<>();
@@ -186,6 +249,14 @@ public class GameSocket {
             drawCardTimes--;
         if(haveThisBuff(player,"怡然"))
             drawCardTimes++;
+        if(haveThisSkill(player,"降智打击")) {
+            if(player.getMood()<game.averageMood()) {
+                drawCardTimes++;
+                player.setMood(game.mathRound(player.getMood()-2.0));
+                drawCardTimes+=2;
+                sendText(game.selectPlayerById(id).getRole().getName()+ "以自己的心情值多换了两张牌啊啊啊啊啊！！！");
+            }
+        }
         for (int i=0;i<drawCardTimes;i++)
             drawCard(player);
         sendAllPlayerMessage();
@@ -243,16 +314,29 @@ public class GameSocket {
             map.put("type","studySuccess");
             map.put("text",game.selectPlayerById(id1).getRole().getName()+"与"+game.selectPlayerById(id2).getRole().getName()+"学习"+name+"成功");
             JSONObject jsonObject=JSONObject.fromObject(map);
-            sendMessage(jsonObject.toString());
             sendText(game.selectPlayerById(id1).getRole().getName()+"与"+game.selectPlayerById(id2).getRole().getName()+"学习"+name+"成功");
+            if(haveThisSkill(game.selectPlayerById(id1),"锋芒毕露")) {
+                for(Player e:game.getPlayers()) {
+                    if (e.getRole().getSex()==1 && e.getId()!=id1) {
+                        e.setMood(game.mathRound(e.getMood()-0.3));
+                        sendText(e.getRole().getName()+"受到‘锋芒毕露'的影响而降低了心情值’");
+                    }
+                }
+            }
+            sendMessage(jsonObject.toString());
         } else {
             Map<String,String> map=new HashMap<>();
             map.put("type","studyFail");
             map.put("text",game.selectPlayerById(id1).getRole().getName()+"与"+game.selectPlayerById(id2).getRole().getName()+"学习"+name+"失败");
             JSONObject jsonObject=JSONObject.fromObject(map);
+            if(haveThisSkill(game.selectPlayerById(id1),"博闻强识")) {
+                addBuff(game.selectPlayerById(id1),"熟练","通过【学习牌】获得的熟练度+1",1,true);
+                sendText(game.selectPlayerById(id1).getRole().getName()+"因为学习失败掌握了一些心得");
+            }
             sendMessage(jsonObject.toString());
             sendText(game.selectPlayerById(id1).getRole().getName()+"与"+game.selectPlayerById(id2).getRole().getName()+"学习"+name+"失败");
         }
+        game.selectPlayerById(id1).setCanStudyTimes(game.selectPlayerById(id1).getCanStudyTimes()-1);
         sendAllPlayerMessage();
     }
 
@@ -299,8 +383,11 @@ public class GameSocket {
         sendText(game.selectPlayerById(id).getRole().getName()+ "制造出了" + name.substring(2) + "！！！");
         if (haveThisSkill(player,"触类旁通")) {
             for (BigProject e:player.getBigProjects()) {
-                for (SmallProject each:e.getSmallProjects())
+                for (SmallProject each:e.getSmallProjects()) {
                     each.setMastery(each.getMastery()+2.0);
+                    if(each.getMastery()>50.0)
+                        each.setMastery(50.0);
+                }
             }
             sendText(game.selectPlayerById(id).getRole().getName()+ "因为制造出了名品而发动了‘触类旁通’");
         }
@@ -334,6 +421,21 @@ public class GameSocket {
             case "留一手":addBuff(player2,"不服输","学习失败时获得的期待值+0.3",1,true);break;
             case "潜心修学":for (int i=0;i<player1.getRole().getNatures().get(5).getLevel()-player1.getRole().getNatures().get(2).getLevel();i++)
                 drawCard(player1);break;
+            case "投资":player1.setFinance(player1.getFinance()-2);
+                double avgBrave = 0;
+                double avgIntelligence = 0;
+                for (Player player:game.getPlayers()) {
+                    avgIntelligence+=player.getRole().getNatures().get(0).getLevel();
+                    avgBrave+=player.getRole().getNatures().get(1).getLevel();
+                }
+                avgBrave/=game.getPlayers().size();
+                avgIntelligence/=game.getPlayers().size();
+                double chance=(double)player1.getRole().getNatures().get(0).getLevel()/(avgBrave+avgIntelligence);
+                if(Math.random()<chance) {player1.setFinance(player1.getFinance()+5);sendText(game.selectPlayerById(id1).getRole().getName()+"投资成功！");}
+                else {sendText(game.selectPlayerById(id1).getRole().getName()+"投资失败了");}
+                break;
+            case "借贷":player1.setFinance(player1.getFinance()-2);player2.setFinance(player2.getFinance()+2);sendText(game.selectPlayerById(id1).getRole().getName()+"借给了"+game.selectPlayerById(id2).getRole().getName()+"2点财力");break;
+            case "5毛零食":player1.setFinance(player1.getFinance()-1);player1.setMood(game.mathRound(player1.getMood()+1.0));sendText(game.selectPlayerById(id1).getRole().getName()+"购买了5毛零食，收获了快乐");break;
         }
         if(haveThisSkill(player1,"幕后黑手")){
             player1.setMood(player1.getMood()+0.5);
@@ -342,7 +444,9 @@ public class GameSocket {
         sendAllPlayerMessage();
         if (name.equals("无独有偶") || name.equals("底力爆发") || name.equals("潜心修学")) {
             sendText(game.selectPlayerById(id1).getRole().getName()+ "使用了[" + name + "]");
-        } else {
+        } else if (name.equals("投资") || name.equals("借贷") || name.equals("5毛零食")){
+
+        }else {
             sendText(game.selectPlayerById(id1).getRole().getName()+"对" + game.selectPlayerById(id2).getRole().getName() + "使用了[" + name + "]");
         }
     }
@@ -371,6 +475,7 @@ public class GameSocket {
                         break;
                     }
                 }break;
+            case "飞来横财":player.setFinance(player.getFinance()+2);break;
         }
         sendAllPlayerMessage();
         sendText(game.selectPlayerById(id).getRole().getName()+ "使用了[" + name + "]，对应的能力上升了");
@@ -407,6 +512,43 @@ public class GameSocket {
                         drawCard(player2);
                         sendText(player1.getRole().getName()+"使用了‘重整旗鼓’清除了"+player2.getRole().getName()+"的异常状态");
                         break;
+            case "珍视":player1.getRole().setCollectionUse(false);
+                        player1.getRole().getCollectionCards().add(player1.getCards().get(indexs.get(0)));
+                        for (Integer e:indexs) {
+                            player1.getCards().remove(player1.getCards().get(e));
+                        }
+                        sendText(player1.getRole().getName()+"收藏了一张牌");
+                        break;
+            case "回忆":player1.setMood(game.mathRound(player1.getMood()-3.0));
+                        for(Nature e:player1.getRole().getNatures()) {
+                            e.setLevel(e.getLevel()+1);
+                        }
+                        addBuff(player1,"回忆余波","回合结束时所有天性-1",1,false);
+                        player1.getCards().addAll(player1.getRole().getCollectionCards());
+                        player1.getRole().getCollectionCards().clear();
+                        sendText(player1.getRole().getName()+"回忆了曾经，获得了暂时的灵感");
+                        break;
+            case "失心":for (Integer e:indexs) {
+                            game.getUsedCards().add(player1.getCards().get(e));
+                            player1.getCards().remove(player1.getCards().get(e));
+                        }
+                        if(Math.random()<(double)player1.getRole().getNatures().get(2).getLevel()/(double)(player1.getRole().getNatures().get(2).getLevel()+player2.getRole().getNatures().get(1).getLevel())) {
+                            addBuff(player2,"失心","出牌阶段无法使用技能",1,false);
+                            sendText(player1.getRole().getName()+"使用了‘失心’为"+player2.getRole().getName()+"添加了buff");
+                        }else {
+                            sendText(player1.getRole().getName()+"使用了‘失心’，但是没有命中");
+                        }
+                        break;
+            case "紧急救援":player1.setFinance(player1.getFinance()-1);
+                        addBuff(player2,"怡然","抽牌数+1",1,true);
+                        sendText(player1.getRole().getName()+"对"+player2.getRole().getName()+"提供了援助");break;
+            case "炉边聚会":player1.setFinance(player1.getFinance()-3);
+                        for (Player player:game.getPlayers()) {
+                            if(player.isRedTeam()==player1.isRedTeam()) {
+                                addBuff(player2,"聚会余兴","学习成功时获得的心情值+0.5",1,true);
+                                sendText(player1.getRole().getName()+"邀请"+player2.getRole().getName()+"参加了聚会");
+                            }
+                        }break;
             default:break;
         }
         sendAllPlayerMessage();
@@ -414,6 +556,14 @@ public class GameSocket {
 
     public void turnOverStage (int id) throws IOException {
         Player player=game.selectPlayerById(id);
+
+        if(haveThisBuff(player,"回忆余波")){
+            for(Nature e:player.getRole().getNatures()) {
+                e.setLevel(e.getLevel()-1);
+            }
+            sendText(player.getRole().getName()+"的回忆结束了");
+        }
+
         for (Buff e:player.getBuffs()) {
             e.setLastTurns(e.getLastTurns()-1);
         }
@@ -424,12 +574,19 @@ public class GameSocket {
                 iterator.remove();//使用迭代器的删除方法删除
             }
         }
+
+        clearRoleLimit(player);//角色个人的属性限制
+
         sendAllPlayerMessage();
         Map<String,String> map1=new HashMap<>();
         map1.put("type","turnOverStage");
         map1.put("id",id+"");
         JSONObject jsonObject=JSONObject.fromObject(map1);
         sendMessage(jsonObject.toString());
+    }
+
+    public void clearRoleLimit (Player player) {
+        player.getRole().setCollectionUse(true);
     }
 
     @OnOpen
@@ -463,6 +620,8 @@ public class GameSocket {
                     sendMessage(jsonObject2.toString());break;
             case "chooseRole":boolean AllChosen=game.chooseRole(jsonObject.getInt("id"),jsonObject.getString("name"));
                 if (AllChosen) {
+                    gameStart();
+                    randomTeam();
                     sendAllPlayerMessage();
                     map1=new HashMap<>();
                     map1.put("type","AllChosen");
