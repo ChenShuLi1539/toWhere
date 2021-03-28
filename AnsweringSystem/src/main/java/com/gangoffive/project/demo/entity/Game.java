@@ -39,12 +39,11 @@ public class Game {
         skills.add(new Skill("珍视","出牌阶段，你可以选择一张牌进行收藏，每回合限一次",false));
         skills.add(new Skill("回忆","出牌阶段，消耗3.0心情值，使你本回合的所有天性临时+1，并取出你收藏的所有牌",false));
         this.roles.add(new Role("吴童",1,2,3,3,2,0,1,
-                "世界和平","在你的最后一个回合结束时场上没有人因为心情值降为0而出局",5.0,skills));
+                "世界和平","全场的平均心情值不低于12.0",5.0,skills));
         skills=new ArrayList<>();
-        skills.add(new Skill("青梅竹马/铁哥们","游戏开始时，选择一名玩家与其绑定成“青梅竹马/铁哥们”的关系，在之后的游戏过程中你可以与其培养“关系值”",true));
-        skills.add(new Skill("纯爱战士/挚友英灵","当你与“青梅竹马/铁哥们”一起学习时，双方对该项目的感兴趣程度临时上升一级（但不会超过上限）。学习成功后，你与对方的关系值+1",true));
+        skills.add(new Skill("天翻地覆","出牌阶段，你可以丢弃两张牌并消耗2.0心情值，获得一张额外的【投资】，每回合限一次",false));
         this.roles.add(new Role("徐东东",1,2,2,3,2,1,1,
-                "心灵伴侣/情同手足","在游戏结算时，与你绑定了“青梅竹马/铁哥们”关系的玩家达成了人生目标并且你与对方的关系值不低于36",5.0,skills));
+                "发大财","财力值达到15",5.0,skills));
         skills=new ArrayList<>();
         skills.add(new Skill("触类旁通","在你制造出名品之后，你对所有项目的熟练度增加2.0",true));
         skills.add(new Skill("文思泉涌","在你的回合开始时，如果你的心情值达到了15及以上，从剩余的牌堆中抽取一张【名品牌】",true));
@@ -59,16 +58,16 @@ public class Game {
         skills.add(new Skill("再生力","你的回合开始时，如果你的心情值低于全场的平均值，你的心情值+0.5",true));
         skills.add(new Skill("熟能生巧","出牌阶段，你可以消耗1.0心情值，对场上任意一名玩家使用，使其下回合通过【学习牌】获得的熟练度+1",false));
         this.roles.add(new Role("杨礼政",1,2,2,0,2,3,2,
-                "世界和平","在你的最后一个回合结束时场上没有人因为心情值降为0而出局",5.0,skills));
+                "世界和平","全场的平均心情值不低于12.0",5.0,skills));
         skills=new ArrayList<>();
         skills.add(new Skill("醉生梦死","出牌阶段，你可以丢弃一定数量的牌，根据丢弃的牌的数量决定接下来效果发生的次数：使你下一位玩家的心情值减少0.3，如果还丢弃有牌，则使该角色的往后第二位玩家心情值增加0.6，如果还丢弃有牌，则是该角色的往后第三位玩家心情值降低0.9，以此类推。每回合限一次",false));
         this.roles.add(new Role("覃思宁",1,3,1,2,1,1,1,
-                "生而活","至少有两个项目熟练度达到C及以上",5.0,skills));
+                "生而活","回合结束时至少有两个项目熟练度达到C及以上",5.0,skills));
         skills=new ArrayList<>();
         skills.add(new Skill("容光焕发","摸牌阶段，如果你的心情值高于全场的平均值，你本回合的抽牌数+1",true));
         skills.add(new Skill("失意","出牌阶段，你可以丢弃两张牌，对场上任意一名玩家使用，使其下回合通过【学习牌】获得的心情值减少1.0",false));
         this.roles.add(new Role("王文捷",1,2,2,1,3,2,2,
-                "兼济天下","在你的最后一个回合结束时，你的心情值为全场最高并且所有人的平均心情值不低于12",8.0,skills));
+                "兼济天下","回合结束时，你的心情值为全场最高并且所有人的平均心情值不低于12",8.0,skills));
         skills=new ArrayList<>();
         skills.add(new Skill("锋芒毕露","当你学习成功时，使场上除你以外的所有男性角色降低0.3心情值",true));
         this.roles.add(new Role("韦承洋",1,3,1,2,2,0,1,
@@ -374,9 +373,9 @@ public class Game {
 
         }
         if(haveThisBuff(player,"愉悦"))
-            player.setMood(player.getMood()+0.3);
+            player.setMood(mathRound(player.getMood()+0.3));
         if(haveThisBuff(player,"聚会余兴"))
-            player.setMood(player.getMood()+0.5);
+            player.setMood(mathRound(player.getMood()+0.5));
         //后计算熟练度
         caculateMasteryUp(player,smallProject,level);
     }
