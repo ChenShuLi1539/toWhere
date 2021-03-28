@@ -486,7 +486,7 @@ public class GameSocket {
         Player player2=game.selectPlayerById(id2);
         indexs.sort(Collections.reverseOrder());
         switch (name) {
-            case "熟能生巧":player1.setMood(player1.getMood()-1.0);
+            case "熟能生巧":player1.setMood(game.mathRound(player1.getMood()-1.0));
                         addBuff(player2,"熟练","通过【学习牌】获得的熟练度+1",1,true);
                         sendText(player1.getRole().getName()+"使用了‘熟能生巧’为"+player2.getRole().getName()+"添加了buff");
                         break;
@@ -549,6 +549,31 @@ public class GameSocket {
                                 sendText(player1.getRole().getName()+"邀请"+player2.getRole().getName()+"参加了聚会");
                             }
                         }break;
+            case "天翻地覆": for (Integer e:indexs) {
+                                game.getUsedCards().add(player1.getCards().get(e));
+                                player1.getCards().remove(player1.getCards().get(e));
+                            }
+                        player1.getRole().setUpDownUse(false);
+                        player1.setMood(game.mathRound(player1.getMood()-2.0));
+                        player1.getCards().add(new Card("投资",3,"消耗2点财力值，有你的聪颖/（全场勇敢平均值+全场聪颖平均值）%概率获得5点财力值。"));
+                        sendText(player1.getRole().getName()+"发动了‘天翻地覆’，想要来一次大逆转");break;
+            case "醉生梦死":int times=indexs.size();
+                        player1.getRole().setDreamDead(false);
+                        for (Integer e:indexs) {
+                            game.getUsedCards().add(player1.getCards().get(e));
+                            player1.getCards().remove(player1.getCards().get(e));
+                        }
+                        int targetIndex=game.getPlayers().indexOf(player1);
+                        for (int i=0;i<times;i++) {
+                            targetIndex=(targetIndex+i+1)%game.getPlayers().size();
+                            if(i%2==0) {
+                                game.getPlayers().get(targetIndex).setMood(game.mathRound(game.getPlayers().get(targetIndex).getMood()-(i+1)*0.3));
+                                sendText(game.getPlayers().get(targetIndex).getRole().getName()+"受到"+player1.getRole().getName()+"技能的影响而失去了心情值");
+                            }else {
+                                game.getPlayers().get(targetIndex).setMood(game.mathRound(game.getPlayers().get(targetIndex).getMood()+(i+1)*0.3));
+                                sendText(game.getPlayers().get(targetIndex).getRole().getName()+"受到"+player1.getRole().getName()+"技能的影响而增加了心情值");
+                            }
+                        }break;
             default:break;
         }
         sendAllPlayerMessage();
@@ -577,6 +602,8 @@ public class GameSocket {
 
         clearRoleLimit(player);//角色个人的属性限制
 
+        turnOverTarget(player);//回合结束时结算人生目标
+
         sendAllPlayerMessage();
         Map<String,String> map1=new HashMap<>();
         map1.put("type","turnOverStage");
@@ -586,7 +613,82 @@ public class GameSocket {
     }
 
     public void clearRoleLimit (Player player) {
+
         player.getRole().setCollectionUse(true);
+        player.getRole().setUpDownUse(true);
+        player.getRole().setDreamDead(true);
+    }
+
+    public void turnOverTarget (Player player) throws IOException {
+        if (!player.getRole().getTarget().isCompleted()) {
+            if (player.getRole().getTarget().getName().equals("园林大师")) {
+                if (player.getBigProjects().get(4).getSmallProjects().get(1).getMastery()>=45) {
+                    player.getRole().getTarget().setCompleted(true);
+                    player.setMood(game.mathRound(player.getMood()+player.getRole().getTarget().getProfit()));
+                    sendText(player.getRole().getName()+"完成了ta的人生目标！！！");
+                }
+            }else if (player.getRole().getTarget().getName().equals("武术大师")) {
+                if (player.getBigProjects().get(0).getSmallProjects().get(3).getMastery()>=45) {
+                    player.getRole().getTarget().setCompleted(true);
+                    player.setMood(game.mathRound(player.getMood()+player.getRole().getTarget().getProfit()));
+                    sendText(player.getRole().getName()+"完成了ta的人生目标！！！");
+                }
+            }else if (player.getRole().getTarget().getName().equals("兼济天下")) {
+                double max=0;
+                for (Player e:game.getPlayers()) {
+                    if (e.getMood()>max)
+                        max=e.getMood();
+                }
+                if (player.getMood() == max && game.averageMood() > 12.0) {
+                    player.getRole().getTarget().setCompleted(true);
+                    player.setMood(game.mathRound(player.getMood()+player.getRole().getTarget().getProfit()));
+                    sendText(player.getRole().getName()+"完成了ta的人生目标！！！");
+                }
+            }else if (player.getRole().getTarget().getName().equals("随心所欲")) {
+                if (player.getUsedCardsNum()>=40) {
+                    player.getRole().getTarget().setCompleted(true);
+                    player.setMood(game.mathRound(player.getMood()+player.getRole().getTarget().getProfit()));
+                    sendText(player.getRole().getName()+"完成了ta的人生目标！！！");
+                }
+            }else if (player.getRole().getTarget().getName().equals("永远开心")) {
+                if (player.getMood()>=20.0) {
+                    player.getRole().getTarget().setCompleted(true);
+                    player.setMood(game.mathRound(player.getMood()+player.getRole().getTarget().getProfit()));
+                    sendText(player.getRole().getName()+"完成了ta的人生目标！！！");
+                }
+            }else if (player.getRole().getTarget().getName().equals("发大财")) {
+                if (player.getFinance()>=15) {
+                    player.getRole().getTarget().setCompleted(true);
+                    player.setMood(game.mathRound(player.getMood()+player.getRole().getTarget().getProfit()));
+                    sendText(player.getRole().getName()+"完成了ta的人生目标！！！");
+                }
+            }else if (player.getRole().getTarget().getName().equals("实现梦想")) {
+                if (player.getTreasures().size()>0) {
+                    player.getRole().getTarget().setCompleted(true);
+                    player.setMood(game.mathRound(player.getMood()+player.getRole().getTarget().getProfit()));
+                    sendText(player.getRole().getName()+"完成了ta的人生目标！！！");
+                }
+            }else if (player.getRole().getTarget().getName().equals("生而活")) {
+                int count=0;
+                for(BigProject bigProject:player.getBigProjects()) {
+                    for (SmallProject smallProject:bigProject.getSmallProjects()) {
+                        if (smallProject.getMastery()>=25)
+                            count++;
+                    }
+                }
+                if (count>1) {
+                    player.getRole().getTarget().setCompleted(true);
+                    player.setMood(game.mathRound(player.getMood()+player.getRole().getTarget().getProfit()));
+                    sendText(player.getRole().getName()+"完成了ta的人生目标！！！");
+                }
+            }else if (player.getRole().getTarget().getName().equals("世界和平")) {
+                if (game.averageMood()>=12.0) {
+                    player.getRole().getTarget().setCompleted(true);
+                    player.setMood(game.mathRound(player.getMood()+player.getRole().getTarget().getProfit()));
+                    sendText(player.getRole().getName()+"完成了ta的人生目标！！！");
+                }
+            }
+        }
     }
 
     @OnOpen
