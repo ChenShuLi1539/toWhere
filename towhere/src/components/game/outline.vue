@@ -83,7 +83,7 @@
                       <div class="playerMessage-header-mid">¥×{{players[index0].finance}}</div>
                       <div class="playerMessage-header-right">❤×{{players[index0].mood}}</div>
                     </div>
-                    <div class="playerMessage-role" :class="{redBackground:players[index0].redTeam,blueBackground:!this.players[index0].redTeam}">{{players[index0].role.name}}</div>
+                    <div class="playerMessage-role" :class="{redBackground:players[index0].redTeam,blueBackground:!players[index0].redTeam}">{{players[index0].role.name}}</div>
                     <div class="playerMessage-buff">
                       <el-tooltip class="item" effect="dark" :content="players[index0].buffs[index].description" placement="top-start"  v-for="(each,index) in players[index0].buffs" v-bind:key="index">
                         <div class="playerMessage-buff-buff">{{players[index0].buffs[index].name}}({{players[index0].buffs[index].lastTurns}})</div>
@@ -750,6 +750,28 @@ export default {
                 this.$message.error('你当前的财力值不足以发动此技能')
               }
               break
+            case '天翻地覆':
+              if (this.players[this.myIndex].mood > 2.0) {
+                if (this.players[this.myIndex].role.upDownUse) {
+                  this.tips = '请选择要丢弃的两张牌'
+                  this.selectedSkill = true
+                  this.chosenSkill = '天翻地覆'
+                } else {
+                  this.$message.error('你本回合已无法再使用此技能')
+                }
+              } else {
+                this.$message.error('你当前的心情值不足以发动此技能')
+              }
+              break
+            case '醉生梦死':
+              if (this.players[this.myIndex].role.dreamDead) {
+                this.tips = '请选择要丢弃的牌'
+                this.selectedSkill = true
+                this.chosenSkill = '醉生梦死'
+              } else {
+                this.$message.error('你本回合已无法再使用此技能')
+              }
+              break
             default:
               break
           }
@@ -927,6 +949,21 @@ export default {
         case '紧急救援':
           if (this.chosenPlayerId < 1) {
             this.$message.error('未选择正确的使用玩家')
+            canUse = false
+          }
+          break
+        case '天翻地覆':
+          if (this.chosenPlayerId < 1) {
+            this.$message.error('未选择正确的使用玩家')
+            canUse = false
+          } else if (this.selectedCards.length !== 2) {
+            this.$message.error('请选择两张牌')
+            canUse = false
+          }
+          break
+        case '醉生梦死':
+          if (this.selectedCards.length < 1) {
+            this.$message.error('请选择至少一张牌')
             canUse = false
           }
           break
